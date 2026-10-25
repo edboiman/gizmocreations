@@ -7,7 +7,7 @@
 //   PROVIDER           "anthropic" or "openai"          (optional, default anthropic)
 //   MODEL              model name                        (optional for anthropic, required for openai)
 //   ALLOWED_ORIGIN     e.g. https://yourname.github.io   (required)
-//   APP_TOKEN          any random string                 (optional; enter the same value in the app's AI settings)
+//   APP_TOKEN          (secret) random string, 16+ chars (required; enter the same value in the app's AI settings)
 // Add a Cloudflare rate-limiting rule as well to cap spend.
 
 const SYSTEM = `You design two- or three-color stranded knitting charts.
@@ -18,19 +18,27 @@ avoid single isolated stitches where possible, and avoid color runs longer than 
 Designs must be original: do not reproduce trademarked logos, emblems or copyrighted characters;
 if asked for one, create an original design in a similar spirit instead.`;
 
+
+// Constant-time comparison so the token can't be guessed by timing responses.
+function sameToken(a, b) { a = String(a); b = String(b); let d = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return d === 0; }
+
 export default {
   async fetch(req, env) {
     const cors = {
       'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, X-App-Token',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Vary': 'Origin', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store'
     };
     const reply = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: cors });
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     if (req.method !== 'POST') return reply({ error: 'POST only' }, 405);
-    if (env.ALLOWED_ORIGIN && req.headers.get('Origin') !== env.ALLOWED_ORIGIN) return reply({ error: 'Origin not allowed' }, 403);
-    if (env.APP_TOKEN && req.headers.get('X-App-Token') !== env.APP_TOKEN) return reply({ error: 'Invalid app token' }, 401);
+    // Fail closed: both settings are required, so a misconfigured Worker can't become an open proxy.
+    if (!env.ALLOWED_ORIGIN || !env.APP_TOKEN || String(env.APP_TOKEN).length < 16) return reply({ error: 'Connector not configured: set ALLOWED_ORIGIN and an APP_TOKEN of 16+ characters.' }, 500);
+    if (req.headers.get('Origin') !== env.ALLOWED_ORIGIN) return reply({ error: 'Origin not allowed' }, 403);
+    if (!sameToken(req.headers.get('X-App-Token') || '', env.APP_TOKEN)) return reply({ error: 'Invalid app token' }, 401);
+    if (Number(req.headers.get('Content-Length') || 0) > 8192) return reply({ error: 'Request too large' }, 413);
 
     let body;
     try { body = await req.json(); } catch { return reply({ error: 'Invalid JSON' }, 400); }

@@ -1,14 +1,19 @@
 // Bow & Purl Ravelry connector — Cloudflare Worker.
+// Also searches Ravelry's yarn database ({action:'yarns'}).
 // Reads a Ravelry user's favorited patterns AND the single patterns in their Ravelry library, and returns name, yarn weight, yardage and link.
 //
 // Variables (Cloudflare dashboard → Worker → Settings → Variables):
 //   RAVELRY_USER   (secret)  "Username" from your Ravelry read-only API credentials
 //   RAVELRY_PASS   (secret)  "Password" from those credentials (NOT your Ravelry login password)
 //   ALLOWED_ORIGIN           e.g. https://yourname.github.io
-//   APP_TOKEN      (secret)  any random phrase; enter the same value in the app
+//   APP_TOKEN      (secret)  random string, 16+ chars (required); enter the same value in the app
 // Get credentials at https://www.ravelry.com/pro/developer → create app → "Basic Auth: read only".
 
 const API = 'https://api.ravelry.com';
+
+
+// Constant-time comparison so the token can't be guessed by timing responses.
+function sameToken(a, b) { a = String(a); b = String(b); let d = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return d === 0; }
 
 export default {
   async fetch(req, env) {
@@ -16,15 +21,34 @@ export default {
       'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, X-App-Token',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Vary': 'Origin', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store'
     };
     const reply = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: cors });
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     if (req.method !== 'POST') return reply({ error: 'POST only' }, 405);
-    if (env.ALLOWED_ORIGIN && req.headers.get('Origin') !== env.ALLOWED_ORIGIN) return reply({ error: 'Origin not allowed' }, 403);
-    if (!env.APP_TOKEN || req.headers.get('X-App-Token') !== env.APP_TOKEN) return reply({ error: 'Invalid app token' }, 401);
+    // Fail closed: both settings are required, so a misconfigured Worker can't become an open proxy.
+    if (!env.ALLOWED_ORIGIN || !env.APP_TOKEN || String(env.APP_TOKEN).length < 16) return reply({ error: 'Connector not configured: set ALLOWED_ORIGIN and an APP_TOKEN of 16+ characters.' }, 500);
+    if (req.headers.get('Origin') !== env.ALLOWED_ORIGIN) return reply({ error: 'Origin not allowed' }, 403);
+    if (!sameToken(req.headers.get('X-App-Token') || '', env.APP_TOKEN)) return reply({ error: 'Invalid app token' }, 401);
+    if (Number(req.headers.get('Content-Length') || 0) > 8192) return reply({ error: 'Request too large' }, 413);
 
     let body; try { body = await req.json(); } catch { return reply({ error: 'Invalid JSON' }, 400); }
+    const auth0 = 'Basic ' + btoa(`${env.RAVELRY_USER}:${env.RAVELRY_PASS}`);
+    // Yarn search: {action:'yarns', query:'knitting for olive'} -> Ravelry's yarn database
+    if (body.action === 'yarns') {
+      const q = String(body.query || '').trim().slice(0, 80);
+      if (q.length < 2) return reply({ error: 'Type at least 2 letters.' }, 400);
+      const r = await fetch(`${API}/yarns/search.json?query=${encodeURIComponent(q)}&page_size=25&sort=best`, { headers: { Authorization: auth0 } });
+      if (!r.ok) return reply({ error: `Ravelry yarn search failed (${r.status}).` }, 502);
+      const j = await r.json();
+      return reply({ yarns: (j.yarns || []).filter(y => !y.discontinued).map(y => ({
+        name: `${y.yarn_company_name || ''} ${y.name || ''}`.trim().slice(0, 80),
+        weight: y.yarn_weight?.name || '', yards: Number.isFinite(y.yardage) ? y.yardage : null,
+        grams: Number.isFinite(y.grams) ? y.grams : null, machineWashable: !!y.machine_washable,
+        url: y.permalink ? `https://www.ravelry.com/yarns/library/${y.permalink}` : ''
+      })) });
+    }
     const username = String(body.username || '').trim();
     if (!/^[A-Za-z0-9_\-.]{1,40}$/.test(username)) return reply({ error: 'Enter a valid Ravelry username.' }, 400);
 
