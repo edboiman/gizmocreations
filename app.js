@@ -19,7 +19,7 @@ function validChart(s) {
 }
 const optNum = v => v === undefined || v === null || (Number.isFinite(v) && v >= 0 && v < 100000);
 const optStr = (v, n) => v === undefined || (typeof v === 'string' && v.length <= n);
-function validPattern(p) { return p && optNum(p.yardsMin) && optNum(p.yardsMax) && optStr(p.yardageNote, 200) && optStr(p.sizes, 200) && optStr(p.designer, 100) && optStr(p.source, 20) && (p.photo === undefined || p.photo === '' || (typeof p.photo === 'string' && p.photo.length < 500 && /^https:\/\//.test(p.photo))) && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
+function validPattern(p) { return p && optNum(p.yardsMin) && optNum(p.yardsMax) && optStr(p.yardageNote, 200) && optStr(p.sizes, 200) && optStr(p.designer, 100) && optStr(p.source, 20) && optStr(p.ravFrom, 20) && (p.photo === undefined || p.photo === '' || (typeof p.photo === 'string' && p.photo.length < 500 && /^https:\/\//.test(p.photo))) && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
 
 patterns = readStorage('bow-purl-patterns', []);
 if (!Array.isArray(patterns) || !patterns.every(validPattern)) patterns = [];
@@ -280,7 +280,7 @@ $('png').onclick = () => $('chart').toBlob(b => { if (b) download(b, 'bow-and-pu
 $('print').onclick = () => window.print();
 
 // ---------- tabs & library ----------
-function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === id)); if (id === 'library') renderLibrary(); }
+function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === id)); if (id === 'library') renderLibrary(); if (id === 'shop') renderShop(); }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('saveChart').onclick = () => { const p = patterns.find(p => p.id === currentId); $('saveWeight').value = p?.weight || weights[3]; $('saveNotes').value = p?.notes || ''; $('saveDialog').showModal(); };
 $('cancelSave').onclick = () => $('saveDialog').close();
@@ -296,7 +296,7 @@ function patternCard(p, parent) {
   const card = document.createElement('article'); card.className = 'panel card'; parent.append(card);
   if (p.chart) card.append(thumb(p.chart));
   else if (p.photo) { const im = document.createElement('img'); im.src = p.photo; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); card.append(im); }
-  const tag = textNode('span', p.source === 'ravelry' ? 'Ravelry favorite' : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
+  const tag = textNode('span', p.source === 'ravelry' ? ({ library: 'In my Ravelry library', both: 'Favorite · in my library' }[p.ravFrom] || 'Ravelry favorite') : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
   textNode('h2', p.name, card);
   if (p.designer) textNode('p', 'by ' + p.designer, card).className = 'muted';
   const y = yardText(p); if (y) textNode('p', '🧶 ' + y + (p.yardageNote ? ' · ' + p.yardageNote : ''), card).className = 'yards';
@@ -321,7 +321,7 @@ function parseYards(t) { const n = String(t).match(/\d[\d,]*/g)?.map(x => Number
 function renderLibrary() {
   const parent = $('patterns'), summary = $('weightSummary'); parent.replaceChildren(); summary.replaceChildren();
   const q = $('search').value.trim().toLowerCase(), src = $('sourceFilter').value;
-  const shown = patterns.filter(p => ($('filter').value === 'all' || p.weight === $('filter').value) && (src === 'all' || (src === 'ravelry') === (p.source === 'ravelry')) && (!q || (p.name + ' ' + (p.designer || '') + ' ' + p.notes).toLowerCase().includes(q)));
+  const shown = patterns.filter(p => ($('filter').value === 'all' || p.weight === $('filter').value) && (src === 'all' || (src === 'mine' ? p.source !== 'ravelry' : p.source === 'ravelry' && (src === 'ravelry' || p.ravFrom === src || p.ravFrom === 'both' || (!p.ravFrom && src === 'favorite')))) && (!q || (p.name + ' ' + (p.designer || '') + ' ' + p.notes).toLowerCase().includes(q)));
   if (!shown.length) { textNode('p', patterns.length ? 'No patterns match these filters.' : 'Your collection is waiting for its first pattern. Import your Ravelry favorites, save a chart, or add a pattern below.', parent); return; }
   const sort = $('sortBy').value;
   const key = p => p.yardsMax ?? p.yardsMin ?? (sort === 'yardsAsc' ? Infinity : -1);
@@ -354,7 +354,7 @@ $('restore').onchange = async e => {
   try {
     if (f.size > 10 * 1024 * 1024) throw Error('Backup too large (maximum 10 MB).');
     const data = JSON.parse(await f.text());
-    if (data.app !== 'bow-and-purl' || ![1, 2].includes(data.version) || !Array.isArray(data.patterns) || data.patterns.length > 500 || !data.patterns.every(validPattern)) throw Error('This is not a valid Bow & Purl backup.');
+    if (data.app !== 'bow-and-purl' || ![1, 2].includes(data.version) || !Array.isArray(data.patterns) || data.patterns.length > 3000 || !data.patterns.every(validPattern)) throw Error('This is not a valid Bow & Purl backup.');
     const ids = new Set(patterns.map(p => p.id)); const added = data.patterns.filter(p => { if (ids.has(p.id)) return false; ids.add(p.id); return true; });
     let m = 0; const motifs = data.motifs && typeof data.motifs === 'object' ? data.motifs : {};
     const nextM = { ...myMotifs }; for (const [k, r] of Object.entries(motifs)) if (k.length <= 60 && validMotif(r) && !nextM[k]) { nextM[k] = r; m++; }
@@ -376,25 +376,63 @@ $('ravSync').onclick = async () => {
   const btn = $('ravSync'); btn.disabled = true; btn.textContent = 'Importing…';
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': token }, body: JSON.stringify({ username: user }), signal: ctrl.signal });
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': token }, body: JSON.stringify({ username: user, include: $('ravInclude').value }), signal: ctrl.signal });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw Error(data.error || `The Ravelry connector returned an error (${res.status}).`);
     if (!Array.isArray(data.patterns)) throw Error('The Ravelry connector returned an unexpected response.');
     let added = 0, updated = 0; const next = structuredClone(patterns);
-    for (const r of data.patterns.slice(0, 500)) {
+    for (const r of data.patterns.slice(0, 2000)) {
       if (!Number.isInteger(r.id)) continue;
       const num = v => Number.isFinite(v) && v >= 0 && v < 100000 ? v : null, str = (v, n) => String(v || '').slice(0, n);
-      const fields = { name: str(r.name, 100) || 'Untitled pattern', weight: ravWeight(r.weight), yardsMin: num(r.yardsMin), yardsMax: num(r.yardsMax), yardageNote: str(r.yardageNote, 200), sizes: str(r.sizes, 200), designer: str(r.designer, 100), link: /^https:\/\/www\.ravelry\.com\//.test(r.url) ? r.url : '', photo: /^https:\/\//.test(r.photo || '') ? str(r.photo, 499) : '', source: 'ravelry' };
+      const fields = { name: str(r.name, 100) || 'Untitled pattern', weight: ravWeight(r.weight), yardsMin: num(r.yardsMin), yardsMax: num(r.yardsMax), yardageNote: str(r.yardageNote, 200), sizes: str(r.sizes, 200), designer: str(r.designer, 100), link: /^https:\/\/www\.ravelry\.com\//.test(r.url) ? r.url : '', photo: /^https:\/\//.test(r.photo || '') ? str(r.photo, 499) : '', source: 'ravelry', ravFrom: Array.isArray(r.from) && r.from.includes('library') ? (r.from.includes('favorite') ? 'both' : 'library') : 'favorite' };
       const id = 'rav-' + r.id, old = next.find(p => p.id === id);
       if (old) { // keep the knitter's own notes and any yardage they typed in
         const keepYards = old.yardsMin != null && fields.yardsMin == null;
+        const was = old.ravFrom || 'favorite';
+        if ($('ravInclude').value !== 'both' && was !== fields.ravFrom) fields.ravFrom = 'both'; // a partial import never removes a tag
         Object.assign(old, fields, keepYards ? { yardsMin: old.yardsMin, yardsMax: old.yardsMax } : {}); updated++;
       } else { next.push({ id, notes: '', ...fields }); added++; }
     }
-    if (persist(next)) { $('filter').value = 'all'; $('sourceFilter').value = 'all'; renderLibrary(); notify(`Ravelry: ${added} new and ${updated} updated favorites.`); }
+    if (persist(next)) { $('filter').value = 'all'; $('sourceFilter').value = 'all'; renderLibrary(); notify(`Ravelry: ${added} new and ${updated} updated patterns.` + (data.note ? ' ' + String(data.note).slice(0, 120) : '')); renderShop(); }
   } catch (err) { notify(err.name === 'AbortError' ? 'Ravelry took too long. Try again.' : err.message); }
-  finally { clearTimeout(t); btn.disabled = false; btn.textContent = '↻ Import my favorites'; }
+  finally { clearTimeout(t); btn.disabled = false; btn.textContent = '↻ Import from Ravelry'; }
 };
+
+// ---------- yarn shop ----------
+const YD_PER_M = 1.0936;
+function skeinYards() { const n = Number($('shopLen').value); if (!(n > 0 && n < 100000)) return 0; return $('shopUnit').value === 'm' ? n * YD_PER_M : n; }
+function renderShop() {
+  const list = $('shopResults'); list.replaceChildren();
+  const w = $('shopWeight').value, per = skeinYards(), have = Number($('shopHave').value) || 0;
+  const matches = patterns.filter(p => p.weight === w || ($('shopUnspec').checked && p.weight === 'Unspecified'));
+  const rows = matches.map(p => {
+    const lo = p.yardsMin ?? p.yardsMax, hi = p.yardsMax ?? p.yardsMin;
+    const sk = lo == null || !per ? null : [Math.ceil(lo / per), Math.ceil(hi / per)];
+    return { p, lo, hi, sk };
+  });
+  const ok = r => !have || !r.sk || r.sk[0] <= have;
+  const shown = rows.filter(r => !$('shopFits').checked || (r.sk && r.sk[0] <= have) || !have);
+  shown.sort((a, b) => (a.lo == null) - (b.lo == null) || (a.lo ?? 0) - (b.lo ?? 0) || a.p.name.localeCompare(b.p.name));
+  const withYds = rows.filter(r => r.lo != null).length;
+  $('shopCount').textContent = matches.length ? `${shown.length} pattern${shown.length === 1 ? '' : 's'} for ${w.replace(/^\d • /, '')}${withYds < matches.length ? ` · ${matches.length - withYds} without yardage` : ''}` : '';
+  if (!matches.length) { textNode('p', patterns.length ? 'No patterns in your library use this weight yet.' : 'Import your Ravelry favorites and library first (Pattern library tab).', list); return; }
+  for (const { p, lo, hi, sk } of shown) {
+    const row = document.createElement('article'); row.className = 'shop-row' + (have && sk && sk[0] > have ? ' short' : ''); list.append(row);
+    if (p.photo) { const im = document.createElement('img'); im.src = p.photo; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); row.append(im); }
+    const body = document.createElement('div'); body.className = 'shop-body'; row.append(body);
+    const h = p.link ? textNode('a', p.name, body) : textNode('b', p.name, body); if (p.link) { h.href = p.link; h.target = '_blank'; h.rel = 'noopener noreferrer'; } h.className = 'shop-name';
+    if (p.designer) textNode('span', p.designer, body).className = 'muted';
+    textNode('span', lo == null ? 'Yardage not listed' : (lo === hi ? `${fmt(lo)} yds` : `${fmt(lo)}–${fmt(hi)} yds`) + (p.sizes ? ' · ' + p.sizes : ''), body).className = 'muted';
+    const badge = textNode('div', sk ? (sk[0] === sk[1] ? `${sk[0]}` : `${sk[0]}–${sk[1]}`) : '?', row); badge.className = 'skeins';
+    textNode('small', sk ? (sk[1] === 1 ? 'skein' : 'skeins') : per ? 'no yardage' : 'enter skein size', badge);
+    if (have && sk && sk[0] <= have && sk[1] > have) textNode('span', `Smaller sizes only with ${have}`, body).className = 'warn';
+    if (have && sk && sk[0] > have) textNode('span', `Need ${sk[0] - have} more skein${sk[0] - have > 1 ? 's' : ''} for the smallest size`, body).className = 'warn';
+  }
+}
+weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('shopWeight').append(o); });
+const shopPrefs = readStorage('bow-purl-shop', {});
+$('shopWeight').value = weights.includes(shopPrefs.w) ? shopPrefs.w : weights[1]; $('shopLen').value = shopPrefs.len || ''; $('shopUnit').value = shopPrefs.unit === 'm' ? 'm' : 'yd';
+for (const id of ['shopWeight', 'shopLen', 'shopUnit', 'shopHave', 'shopUnspec', 'shopFits']) $(id).addEventListener('input', () => { writeStorage('bow-purl-shop', { w: $('shopWeight').value, len: $('shopLen').value, unit: $('shopUnit').value }); renderShop(); });
 
 // kitten photos: hide any slot whose file hasn't been added yet
 document.querySelectorAll('img.kitten').forEach(img => { img.onerror = () => img.closest('figure').classList.add('empty'); if (img.complete && !img.naturalWidth) img.onerror(); });

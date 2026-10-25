@@ -1,5 +1,5 @@
 // Bow & Purl Ravelry connector — Cloudflare Worker.
-// Reads a Ravelry user's favorited patterns and returns name, yarn weight, yardage and link.
+// Reads a Ravelry user's favorited patterns AND the single patterns in their Ravelry library, and returns name, yarn weight, yardage and link.
 //
 // Variables (Cloudflare dashboard → Worker → Settings → Variables):
 //   RAVELRY_USER   (secret)  "Username" from your Ravelry read-only API credentials
@@ -38,13 +38,28 @@ export default {
     };
 
     try {
-      // 1. favorited pattern ids (up to 500)
-      const ids = [];
-      for (let page = 1; page <= 5; page++) {
-        const j = await get(`/people/${encodeURIComponent(username)}/favorites/list.json?types=pattern&page_size=100&page=${page}`);
-        for (const f of j.favorites || []) if (f.favorited?.id) ids.push(f.favorited.id);
+      const want = body.include === 'favorites' || body.include === 'library' ? body.include : 'both';
+      const from = new Map(); // pattern id -> Set('favorite','library')
+      const mark = (id, tag) => { if (!Number.isInteger(id)) return; if (!from.has(id)) from.set(id, new Set()); from.get(id).add(tag); };
+      const user = encodeURIComponent(username);
+      // 1a. favorited patterns (up to 1000)
+      if (want !== 'library') for (let page = 1; page <= 10; page++) {
+        const j = await get(`/people/${user}/favorites/list.json?types=pattern&page_size=100&page=${page}`);
+        for (const f of j.favorites || []) mark(f.favorited?.id, 'favorite');
         if (!j.paginator || page >= j.paginator.last_page) break;
       }
+      // 1b. patterns in their Ravelry library (purchased / saved pattern PDFs; up to 1000)
+      let libraryNote = '';
+      if (want !== 'favorites') {
+        try {
+          for (let page = 1; page <= 10; page++) {
+            const j = await get(`/people/${user}/library/search.json?page_size=100&page=${page}`);
+            for (const v of j.volumes || []) mark(v.pattern_id, 'library');
+            if (!j.paginator || page >= j.paginator.last_page) break;
+          }
+        } catch (e) { if (e.code === 404) libraryNote = 'Library is private or empty, so only favorites were imported.'; else throw e; }
+      }
+      const ids = [...from.keys()].slice(0, 1500);
       // 2. full pattern details in batches
       const out = [];
       for (let i = 0; i < ids.length; i += 50) {
@@ -52,6 +67,7 @@ export default {
         for (const p of Object.values(j.patterns || {})) {
           out.push({
             id: p.id,
+            from: [...(from.get(p.id) || [])],
             name: String(p.name || 'Untitled').slice(0, 100),
             weight: p.yarn_weight?.name || p.yarn_weight_description || '',
             yardsMin: Number.isFinite(p.yardage) ? p.yardage : null,
@@ -64,7 +80,7 @@ export default {
           });
         }
       }
-      return reply({ patterns: out });
+      return reply({ patterns: out, note: libraryNote });
     } catch (e) {
       return reply({ error: e.code ? e.message : 'Could not reach Ravelry.' }, e.code || 502);
     }

@@ -17,3 +17,9 @@ nav{display:flex;gap:10px;margin:28px 0;border-bottom:1px solid var(--line);padd
 .card>img{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:12px}
 .table-scroll{overflow-x:auto}.summary{width:100%;border-collapse:collapse;font-size:14px}.summary th,.summary td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}.summary th{font-size:12px;color:#82616c}.summary td:not(:first-child),.summary th:not(:first-child){text-align:right}.summary a{color:var(--pink)}
 .ravelry{background:#fbeef2}
+.shop-form{position:sticky;top:0;z-index:2}
+.shop-row{display:flex;gap:12px;align-items:center;background:#fffdfb;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px}.shop-row>img{width:56px;height:56px;object-fit:cover;border-radius:10px;flex-shrink:0}.shop-row.short{opacity:.6}
+.shop-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.shop-name{font-weight:bold;color:#533744;text-decoration:none;overflow-wrap:anywhere}a.shop-name:hover{color:var(--pink)}.shop-body .muted{margin:0}
+.skeins{text-align:center;font-size:22px;font-weight:bold;color:#8f3152;min-width:64px;line-height:1.1}.skeins small{display:block;font-size:11px;font-weight:normal;color:#82616c}
+.warn{font-size:12px;color:#a2581b}
+@media(max-width:760px){.shop-form{position:static}nav{overflow-x:auto;flex-wrap:nowrap}nav button{white-space:nowrap}}
