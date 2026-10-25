@@ -23,3 +23,10 @@ nav{display:flex;gap:10px;margin:28px 0;border-bottom:1px solid var(--line);padd
 .skeins{text-align:center;font-size:22px;font-weight:bold;color:#8f3152;min-width:64px;line-height:1.1}.skeins small{display:block;font-size:11px;font-weight:normal;color:#82616c}
 .warn{font-size:12px;color:#a2581b}
 @media(max-width:760px){.shop-form{position:static}nav{overflow-x:auto;flex-wrap:nowrap}nav button{white-space:nowrap}}
+.hero-photos{position:relative;width:270px;height:230px;flex-shrink:0;margin-right:20px}.hero-photos img{position:absolute;object-fit:cover;border:5px solid #fffdfb;border-radius:18px;box-shadow:8px 10px 0 #e4acbd}.hero-photos img:first-child{width:150px;height:210px;left:0;top:0;transform:rotate(-5deg);object-position:center 40%}.hero-photos img:last-child{width:140px;height:170px;right:0;bottom:0;transform:rotate(5deg);object-position:center 25%}
+.kitten-banner{display:flex;align-items:center;gap:16px;padding:10px;margin-bottom:8px}.kitten-banner img{width:96px!important;height:96px!important;border-radius:14px;flex-shrink:0;object-position:center 30%}.kitten-banner figcaption{position:static;background:none;font-family:Georgia,serif;font-size:18px;color:#8f3152;padding:0}
+.yarn-lines{display:flex;flex-direction:column;gap:2px;margin:6px 0 10px}.yarn-lines .muted{margin:0}.cost{font-size:13px;color:#3d6b45;font-weight:bold}
+.stash-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:10px 0;flex-wrap:wrap}.stash-item>div:first-child{display:flex;flex-direction:column;min-width:0}.stash-item button{min-height:36px;padding:6px 12px}
+.stash-match{display:flex;flex-direction:column;padding:8px 0;border-top:1px dashed var(--line)}.stash-match a{color:#533744;font-weight:bold}.ok{font-size:13px;color:#3d6b45}
+.summary td.on{background:#f5e6ed;font-weight:bold}code{background:#f5e6ed;padding:1px 5px;border-radius:4px;font-size:12px}
+@media(max-width:760px){.hero-photos{width:130px;height:170px;margin:0 -8px 0 4px}.hero-photos img:first-child{width:95px;height:135px}.hero-photos img:last-child{width:85px;height:105px}}

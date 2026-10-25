@@ -4,8 +4,8 @@ A phone-friendly knitting colorwork studio. Static HTML, CSS and JavaScript — 
 ## Upload to GitHub Pages
 Upload everything in this folder to the repository root, keeping the folders:
 ```
-index.html  style.css  app.js  motifs.js  llm.js  README.md
-images/     (your kitten photos — see below)
+index.html  style.css  app.js  yarns.js  motifs.js  llm.js  README.md
+images/     (the cat photos)
 worker/claude-worker.js   (optional AI connector; deployed separately, harmless if uploaded)
 ```
 Then Settings → Pages → Deploy from a branch → main → / (root).
@@ -23,10 +23,13 @@ Then Settings → Pages → Deploy from a branch → main → / (root).
 - **Yardage on any pattern**: add or edit yards on your own patterns too.
 - **Library thumbnails**. Old v1 charts and backups still load.
 
-## Kitten photos
-The studio, library and help tabs each show a kitten banner. Add your own photos to `images/`:
-`kitten-studio.jpg`, `kitten-shop.jpg`, `kitten-library.jpg`, `kitten-help.jpg` (landscape, ~1200×400 works well).
-Use photos you took or that are licensed for reuse (e.g. Unsplash or Pexels — check each photo's licence). Any banner without a file simply hides itself.
+## Cat photos
+The hero and each tab use the owner's own cat photos in `images/` (resized, with all EXIF/GPS metadata removed). To swap one, replace the file with the same name.
+
+## Yarn, stash and prices
+- **Yarn suggestions**: every pattern shows the yarn the designer used (from Ravelry, when listed) plus common brands for its weight.
+- **My stash tab**: add brand, weight, yards per skein and skeins (pick a known yarn to auto-fill). It lists patterns from your library that each yarn covers, or all yarns of a weight combined, with "every size fits" or "smaller sizes fit" and leftovers.
+- **Prices tab**: built-in rough 2026 US Midwest averages per yard in budget, mid and premium tiers, used for cost estimates across the app. Import your own CSV (`yarn,Cascade 220,10.99,220` or `weight,Fingering,12,400`; price per skein); "Download template" shows the format. Brand yardages and prices are typical values; check ball bands and your shop.
 
 ## Optional AI design (Claude or ChatGPT)
 `llm.js` sends a prompt to a small connector that you host; the connector holds the API key. **Never put an API key in the GitHub files** — anyone could read it.
@@ -51,7 +54,7 @@ Ravelry requires API credentials, and they must not go in the public GitHub file
 Re-importing updates existing patterns without touching your notes. Imports up to 2,000 patterns. The library import includes single patterns (PDFs, purchases); patterns inside books and magazines in your Ravelry library aren't included, so favorite those individually or add them by hand. If your library is private, only favorites are imported. Patterns without yardage on Ravelry show "Yardage not listed"; tap Edit details to fill it in. Yardage ranges run from smallest to largest size. Use of the Ravelry API is subject to Ravelry's API terms; this read-only setup is intended for personal use.
 
 ## Design notes
-All motifs and the mascot (Mochi, a calico cat) are original artwork. The app does not include licensed characters, game logos or emblems; the AI connector is instructed to make original designs in the same spirit if asked for one.
+All motifs are original artwork. The app does not include licensed characters, game logos or emblems; the AI connector is instructed to make original designs in the same spirit if asked for one.
 
 ## Limits
-Patterns are stored in the browser on one device; export backups. No accounts or sync. The float check is a guide, not a full stranded-knitting review. Test on a real phone and print once before sharing with customers.
+Patterns, stash and prices are stored in the browser on one device; backups include them. No accounts or sync. The float check is a guide, not a full stranded-knitting review. Test on a real phone and print once before sharing with customers.

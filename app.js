@@ -21,7 +21,7 @@ function validChart(s) {
 }
 const optNum = v => v === undefined || v === null || (Number.isFinite(v) && v >= 0 && v < 100000);
 const optStr = (v, n) => v === undefined || (typeof v === 'string' && v.length <= n);
-function validPattern(p) { return p && optNum(p.yardsMin) && optNum(p.yardsMax) && optStr(p.yardageNote, 200) && optStr(p.sizes, 200) && optStr(p.designer, 100) && optStr(p.source, 20) && optStr(p.ravFrom, 20) && (p.photo === undefined || p.photo === '' || (typeof p.photo === 'string' && p.photo.length < 500 && /^https:\/\//.test(p.photo))) && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
+function validPattern(p) { return p && optNum(p.yardsMin) && optNum(p.yardsMax) && optStr(p.yardageNote, 200) && optStr(p.sizes, 200) && optStr(p.designer, 100) && optStr(p.source, 20) && optStr(p.ravFrom, 20) && (p.yarns === undefined || (Array.isArray(p.yarns) && p.yarns.length <= 3 && p.yarns.every(y => typeof y === 'string' && y.length <= 80))) && (p.photo === undefined || p.photo === '' || (typeof p.photo === 'string' && p.photo.length < 500 && /^https:\/\//.test(p.photo))) && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
 
 patterns = readStorage('bow-purl-patterns', []);
 if (!Array.isArray(patterns) || !patterns.every(validPattern)) patterns = [];
@@ -304,6 +304,7 @@ function patternCard(p, parent) {
   const y = yardText(p); if (y) textNode('p', '🧶 ' + y + (p.yardageNote ? ' · ' + p.yardageNote : ''), card).className = 'yards';
   else textNode('p', 'Yardage not listed — tap Edit details to add it.', card).className = 'muted';
   if (p.sizes) textNode('p', 'Sizes: ' + p.sizes, card).className = 'muted';
+  if (typeof yarnLines === 'function') { const yl = document.createElement('div'); yl.className = 'yarn-lines'; card.append(yl); yarnLines(p, yl); }
   if (p.chart) textNode('p', `${p.chart.cols} stitches × ${p.chart.rows} rows · Row ${p.chart.row}`, card);
   if (p.notes) textNode('p', p.notes, card);
   if (p.link) { const a = textNode('a', p.source === 'ravelry' ? 'Open on Ravelry ↗' : 'Open pattern ↗', card); a.href = p.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
@@ -350,7 +351,7 @@ function renderLibrary() {
 }
 for (const id of ['filter', 'sourceFilter', 'sortBy']) $(id).onchange = renderLibrary; $('search').oninput = renderLibrary;
 $('addPattern').onsubmit = e => { e.preventDefault(); const link = $('patternLink').value.trim(); if (link && !/^https?:\/\//i.test(link)) { notify('Use an https:// or http:// pattern link.'); return; } const item = { id: crypto.randomUUID(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link, ...parseYards($('patternYards').value) }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } };
-$('backup').onclick = () => download(new Blob([JSON.stringify({ app: 'bow-and-purl', version: 2, patterns, motifs: myMotifs }, null, 2)], { type: 'application/json' }), 'bow-and-purl-backup.json');
+$('backup').onclick = () => download(new Blob([JSON.stringify({ app: 'bow-and-purl', version: 2, patterns, motifs: myMotifs, stash: readStorage('bow-purl-stash', []), prices: readStorage('bow-purl-prices', null) }, null, 2)], { type: 'application/json' }), 'bow-and-purl-backup.json');
 $('restore').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   try {
@@ -360,6 +361,7 @@ $('restore').onchange = async e => {
     const ids = new Set(patterns.map(p => p.id)); const added = data.patterns.filter(p => { if (ids.has(p.id)) return false; ids.add(p.id); return true; });
     let m = 0; const motifs = data.motifs && typeof data.motifs === 'object' ? data.motifs : {};
     const nextM = { ...myMotifs }; for (const [k, r] of Object.entries(motifs)) if (k.length <= 60 && validMotif(r) && !nextM[k]) { nextM[k] = r; m++; }
+    if (Array.isArray(data.stash) && data.stash.length <= 500 && !readStorage('bow-purl-stash', []).length) { const ok = data.stash.filter(s => s && typeof s.brand === 'string' && s.brand.length <= 80 && weights.includes(s.weight) && s.yards > 0 && s.yards < 10000 && s.skeins > 0 && s.skeins < 1000).map(s => ({ id: crypto.randomUUID(), brand: s.brand, weight: s.weight, yards: +s.yards, skeins: +s.skeins, color: String(s.color || '').slice(0, 60) })); if (ok.length && writeStorage('bow-purl-stash', ok) && typeof stash !== 'undefined') stash = ok; }
     if (m && writeStorage('bow-purl-motifs', nextM)) { myMotifs = nextM; buildMotifMenu($('motif').value); }
     if (persist([...patterns, ...added])) { renderLibrary(); notify(`Restored ${added.length} new patterns and ${m} motifs. Existing items were kept.`); }
   } catch (err) { notify(err.message); } finally { e.target.value = ''; }
@@ -386,7 +388,7 @@ $('ravSync').onclick = async () => {
     for (const r of data.patterns.slice(0, 2000)) {
       if (!Number.isInteger(r.id)) continue;
       const num = v => Number.isFinite(v) && v >= 0 && v < 100000 ? v : null, str = (v, n) => String(v || '').slice(0, n);
-      const fields = { name: str(r.name, 100) || 'Untitled pattern', weight: ravWeight(r.weight), yardsMin: num(r.yardsMin), yardsMax: num(r.yardsMax), yardageNote: str(r.yardageNote, 200), sizes: str(r.sizes, 200), designer: str(r.designer, 100), link: /^https:\/\/www\.ravelry\.com\//.test(r.url) ? r.url : '', photo: /^https:\/\//.test(r.photo || '') ? str(r.photo, 499) : '', source: 'ravelry', ravFrom: Array.isArray(r.from) && r.from.includes('library') ? (r.from.includes('favorite') ? 'both' : 'library') : 'favorite' };
+      const fields = { name: str(r.name, 100) || 'Untitled pattern', weight: ravWeight(r.weight), yardsMin: num(r.yardsMin), yardsMax: num(r.yardsMax), yardageNote: str(r.yardageNote, 200), sizes: str(r.sizes, 200), designer: str(r.designer, 100), link: /^https:\/\/www\.ravelry\.com\//.test(r.url) ? r.url : '', photo: /^https:\/\//.test(r.photo || '') ? str(r.photo, 499) : '', yarns: Array.isArray(r.yarns) ? r.yarns.filter(y => typeof y === 'string').slice(0, 3).map(y => y.slice(0, 80)) : [], source: 'ravelry', ravFrom: Array.isArray(r.from) && r.from.includes('library') ? (r.from.includes('favorite') ? 'both' : 'library') : 'favorite' };
       const id = 'rav-' + r.id, old = next.find(p => p.id === id);
       if (old) { // keep the knitter's own notes and any yardage they typed in
         const keepYards = old.yardsMin != null && fields.yardsMin == null;
@@ -428,6 +430,7 @@ function renderShop() {
     textNode('span', lo == null ? 'Yardage not listed' : (lo === hi ? `${fmt(lo)} yds` : `${fmt(lo)}–${fmt(hi)} yds`) + (p.sizes ? ' · ' + p.sizes : ''), body).className = 'muted';
     const badge = textNode('div', sk ? (sk[0] === sk[1] ? `${sk[0]}` : `${sk[0]}–${sk[1]}`) : '?', row); badge.className = 'skeins';
     textNode('small', sk ? (sk[1] === 1 ? 'skein' : 'skeins') : per ? 'no yardage' : 'enter skein size', badge);
+    if (typeof costText === 'function' && lo != null) { const c = costText(p.weight, lo, hi); if (c) textNode('span', c + ' est.', body).className = 'cost'; }
     if (have && sk && sk[0] <= have && sk[1] > have) textNode('span', `Smaller sizes only with ${have}`, body).className = 'warn';
     if (have && sk && sk[0] > have) textNode('span', `Need ${sk[0] - have} more skein${sk[0] - have > 1 ? 's' : ''} for the smallest size`, body).className = 'warn';
   }
