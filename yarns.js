@@ -3,26 +3,48 @@
 //
 // YARN_BRANDS: widely sold yarns for each standard weight. Yardage is per skein from the usual put-up;
 // prices are rough 2026 US retail estimates (USD per skein). Always check the ball band and your shop.
+// [brand, yarn, yards per skein, fiber, est. USD per skein]. Values marked in README as approximate;
+// Knitting for Olive Merino (273 yd) and Heavy Merino (136 yd) confirmed from retailer listings, Oct 2026.
 const YARN_BRANDS = {
   '0 • Lace': [
-    ['Malabrigo', 'Lace', 470, 'Merino', 15], ['Knit Picks', 'Shadow', 440, 'Merino', 8], ['Cascade', 'Heritage Silk Lace', 875, 'Merino / silk', 16]],
+    ['Knitting for Olive', 'Soft Silk Mohair', 245, 'Mohair / silk', 16], ['Malabrigo', 'Lace', 470, 'Merino', 15],
+    ['Knit Picks', 'Shadow', 440, 'Merino', 8], ['Drops', 'Kid-Silk', 229, 'Mohair / silk', 7], ['Sandnes Garn', 'Tynn Silk Mohair', 232, 'Mohair / silk', 13],
+    ['Isager', 'Silk Mohair', 232, 'Mohair / silk', 16], ['Rowan', 'Kidsilk Haze', 229, 'Mohair / silk', 15], ['Lana Grossa', 'Silkhair', 229, 'Mohair / silk', 12],
+    ['La Bien Aimée', 'Mohair Silk', 459, 'Mohair / silk', 32], ['Cascade', 'Heritage Silk Lace', 875, 'Merino / silk', 16]],
   '1 • Super fine / Fingering': [
-    ['Malabrigo', 'Sock', 440, 'Merino', 20], ['Knit Picks', 'Stroll', 231, 'Merino / nylon', 7], ['Knit Picks', 'Palette', 231, 'Wool', 4.5],
-    ['Cascade', 'Heritage', 437, 'Merino / nylon', 15], ['Madelinetosh', 'Tosh Merino Light', 420, 'Merino', 27]],
+    ['Knitting for Olive', 'Merino', 273, 'Merino', 10.5], ['Knitting for Olive', 'Pure Silk', 273, 'Silk', 22], ['Knitting for Olive', 'Compatible Cashmere', 273, 'Cashmere', 24],
+    ['Malabrigo', 'Sock', 440, 'Merino', 20], ['Madelinetosh', 'Tosh Merino Light', 420, 'Merino', 27], ['Hedgehog Fibres', 'Sock', 437, 'Merino / nylon', 32],
+    ['La Bien Aimée', 'Merino Singles', 400, 'Merino', 32], ['Miss Babs', 'Yummy 2-Ply', 400, 'Merino', 30], ['Neighborhood Fiber Co', 'Studio Sock', 400, 'Merino', 30],
+    ['Qing Fibre', 'Merino Singles', 366, 'Merino', 30], ['Spincycle', 'Dream State', 465, 'Wool / mohair', 32], ['Brooklyn Tweed', 'Loft', 275, 'Wool', 18],
+    ['Sandnes Garn', 'Sunday', 257, 'Merino', 9], ['Sandnes Garn', 'Tynn Peer Gynt', 224, 'Wool', 8], ['Drops', 'Alpaca', 182, 'Alpaca', 4], ['Drops', 'Fabel', 224, 'Wool / nylon', 3.5],
+    ['Holst Garn', 'Supersoft', 314, 'Wool', 6], ['Rauma', 'Finull', 191, 'Wool', 7], ['Biches & Bûches', 'Le Petit Lambswool', 284, 'Lambswool', 14],
+    ['Jamieson & Smith', '2 Ply Jumper Weight', 125, 'Shetland wool', 6], ['Jamieson’s', 'Spindrift', 115, 'Shetland wool', 6], ['Tukuwool', 'Fingering', 191, 'Wool', 9],
+    ['Cascade', 'Heritage', 437, 'Merino / nylon', 15], ['Knit Picks', 'Stroll', 231, 'Merino / nylon', 7], ['Knit Picks', 'Palette', 231, 'Wool', 4.5],
+    ['Lang', 'Jawoll', 230, 'Wool / nylon', 9], ['West Yorkshire Spinners', 'Signature 4 Ply', 437, 'Wool / nylon', 16], ['Regia', '4-fädig', 459, 'Wool / nylon', 12]],
   '2 • Fine / Sport': [
-    ['Knit Picks', 'Brava Sport', 273, 'Acrylic', 4], ['Cascade', '220 Sport', 164, 'Wool', 8], ['Berroco', 'Ultra Wool Fine', 433, 'Wool', 16]],
+    ['Drops', 'Baby Merino', 191, 'Merino', 5], ['Sandnes Garn', 'Tynn Merinoull', 191, 'Merino', 8], ['Knit Picks', 'Brava Sport', 273, 'Acrylic', 4],
+    ['Cascade', '220 Sport', 164, 'Wool', 8], ['Berroco', 'Ultra Wool Fine', 433, 'Wool', 16], ['Brooklyn Tweed', 'Peerie', 210, 'Merino', 14],
+    ['Biches & Bûches', 'Le Gros Lambswool', 185, 'Lambswool', 16], ['Purl Soho', 'Linen Quill', 439, 'Wool / alpaca / linen', 26]],
   '3 • Light / DK': [
     ['Paintbox', 'Simply DK', 302, 'Acrylic', 4], ['Rowan', 'Felted Tweed', 191, 'Wool / alpaca / viscose', 15], ['Lion Brand', 'Coboo', 232, 'Cotton / bamboo', 8],
-    ['Knit Picks', 'Swish DK', 123, 'Superwash merino', 5], ['West Yorkshire Spinners', 'Bo Peep DK', 245, 'Wool / nylon', 14]],
+    ['Knit Picks', 'Swish DK', 123, 'Superwash merino', 5], ['West Yorkshire Spinners', 'Bo Peep DK', 245, 'Wool / nylon', 14],
+    ['Drops', 'Karisma', 109, 'Wool', 3.5], ['Drops', 'Merino Extra Fine', 115, 'Merino', 4.5], ['Sandnes Garn', 'Double Sunday', 118, 'Merino', 9], ['Sandnes Garn', 'Peer Gynt', 98, 'Wool', 8],
+    ['Brooklyn Tweed', 'Arbor', 145, 'Wool', 14], ['Woolfolk', 'Får', 142, 'Merino', 22], ['Malabrigo', 'Arroyo', 335, 'Superwash merino', 18],
+    ['Hedgehog Fibres', 'Skinny Singles', 400, 'Merino', 32], ['De Rerum Natura', 'Gilliatt', 273, 'Merino', 22], ['Lang', 'Merino 120', 131, 'Merino', 8]],
   '4 • Medium / Worsted / Aran': [
-    ['Cascade', '220', 220, 'Wool', 11], ['Malabrigo', 'Rios', 210, 'Superwash merino', 18], ['Lion Brand', 'Wool-Ease', 197, 'Acrylic / wool', 6.5],
-    ['Red Heart', 'Super Saver', 364, 'Acrylic', 5], ['Knit Picks', 'Wool of the Andes', 110, 'Wool', 4], ['Berroco', 'Vintage', 217, 'Acrylic / wool / nylon', 10]],
+    ['Knitting for Olive', 'Heavy Merino', 136, 'Merino', 10.5], ['Cascade', '220', 220, 'Wool', 11], ['Malabrigo', 'Rios', 210, 'Superwash merino', 18], ['Malabrigo', 'Worsted', 210, 'Merino', 17],
+    ['Brooklyn Tweed', 'Shelter', 140, 'Wool', 14], ['Madelinetosh', 'Tosh Vintage', 200, 'Superwash merino', 28], ['Drops', 'Nepal', 82, 'Wool / alpaca', 4],
+    ['Purl Soho', 'Worsted Twist', 164, 'Merino', 22], ['Plymouth', 'Encore', 200, 'Acrylic / wool', 7], ['Lion Brand', 'Wool-Ease', 197, 'Acrylic / wool', 6.5],
+    ['Red Heart', 'Super Saver', 364, 'Acrylic', 5], ['Knit Picks', 'Wool of the Andes', 110, 'Wool', 4], ['Berroco', 'Vintage', 217, 'Acrylic / wool / nylon', 10],
+    ['Lion Brand', 'Pound of Love', 1020, 'Acrylic', 12], ['Hobbii', 'Rainbow Cotton 8/8', 87, 'Cotton', 2.5]],
   '5 • Bulky': [
-    ['Malabrigo', 'Chunky', 104, 'Merino', 16], ['Cascade', '128 Superwash', 128, 'Superwash wool', 11], ['Lion Brand', 'Hue + Me', 137, 'Acrylic / wool', 7], ['Bernat', 'Softee Chunky', 108, 'Acrylic', 5]],
+    ['Malabrigo', 'Chunky', 104, 'Merino', 16], ['Cascade', '128 Superwash', 128, 'Superwash wool', 11], ['Lion Brand', 'Hue + Me', 137, 'Acrylic / wool', 7], ['Bernat', 'Softee Chunky', 108, 'Acrylic', 5],
+    ['Drops', 'Andes', 98, 'Wool / alpaca', 7], ['Brooklyn Tweed', 'Quarry', 200, 'Wool', 22], ['Sandnes Garn', 'Alpakka Ull', 109, 'Alpaca / wool', 9]],
   '6 • Super bulky': [
-    ['Lion Brand', 'Wool-Ease Thick & Quick', 106, 'Acrylic / wool', 9], ['Malabrigo', 'Rasta', 90, 'Merino', 19], ['Bernat', 'Blanket', 220, 'Polyester', 10]],
+    ['Lion Brand', 'Wool-Ease Thick & Quick', 106, 'Acrylic / wool', 9], ['Malabrigo', 'Rasta', 90, 'Merino', 19], ['Bernat', 'Blanket', 220, 'Polyester', 10],
+    ['Wool and the Gang', 'Crazy Sexy Wool', 87, 'Wool', 30], ['We Are Knitters', 'The Wool', 87, 'Wool', 28], ['Drops', 'Polaris', 40, 'Wool', 6], ['Drops', 'Snow', 54, 'Wool', 4]],
   '7 • Jumbo': [
-    ['Bernat', 'Blanket Extra Thick', 72, 'Polyester', 13]]
+    ['Bernat', 'Blanket Extra Thick', 72, 'Polyester', 13], ['Lion Brand', 'Go For Faux Thick & Quick', 24, 'Polyester', 10]]
 };
 
 // Average price per yard by weight, 2026 US (Midwest) estimate, in three tiers.
@@ -35,13 +57,18 @@ const TIERS = ['Budget (acrylic)', 'Mid (wool / blends)', 'Premium (indie, merin
 
 let prices = readStorage('bow-purl-prices', null);
 if (!prices || typeof prices.perYard !== 'object') prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: 1, source: 'Built-in 2026 US Midwest estimates' };
+let myYarns = readStorage('bow-purl-yarns', []);
+if (!Array.isArray(myYarns)) myYarns = [];
+myYarns = myYarns.filter(y => y && typeof y.name === 'string' && y.name.length <= 80 && weights.includes(y.weight) && y.yards > 0 && y.yards < 10000).slice(0, 300);
 let stash = readStorage('bow-purl-stash', []);
 if (!Array.isArray(stash)) stash = [];
 const money = n => '$' + (n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(2));
 
 // ---------- helpers other screens use ----------
-function brandsFor(weight) { return YARN_BRANDS[weight] || []; }
-function brandText(weight, n = 3) { return brandsFor(weight).slice(0, n).map(r => `${r[0]} ${r[1]}`).join(', '); }
+function brandsFor(weight) { // yarns you've saved first, then the built-in list
+  return [...myYarns.filter(y => y.weight === weight).map(y => [y.name, '', y.yards, '', 0]), ...(YARN_BRANDS[weight] || [])];
+}
+function brandText(weight, n = 3) { return brandsFor(weight).slice(0, n).map(r => `${r[0]} ${r[1]}`.trim()).join(', '); }
 function pricePerYard(weight, brandLine) {
   if (brandLine) { const c = prices.custom.find(c => c.name.toLowerCase() === brandLine.toLowerCase()); if (c && c.yards) return c.price / c.yards; }
   return (prices.perYard[weight] || DEFAULT_PRICES.Unspecified)[prices.tier];
@@ -59,13 +86,41 @@ function yarnLines(p, parent) { // designer's yarn + other suggestions + cost, u
 }
 
 // ---------- brand menus ----------
-function allLines() { const out = []; for (const [w, rows] of Object.entries(YARN_BRANDS)) for (const r of rows) out.push({ name: `${r[0]} ${r[1]}`, weight: w, yards: r[2], fiber: r[3], price: r[4] }); for (const c of prices.custom) if (!out.some(o => o.name.toLowerCase() === c.name.toLowerCase())) out.push(c); return out; }
+function allLines() { const out = []; for (const [w, rows] of Object.entries(YARN_BRANDS)) for (const r of rows) out.push({ name: `${r[0]} ${r[1]}`, weight: w, yards: r[2], fiber: r[3], price: r[4] }); for (const y of myYarns) if (!out.some(o => o.name.toLowerCase() === y.name.toLowerCase())) out.unshift({ name: y.name, weight: y.weight, yards: y.yards });
+  for (const c of prices.custom) if (!out.some(o => o.name.toLowerCase() === c.name.toLowerCase())) out.push(c); return out; }
 function fillBrandList() { const dl = $('brandList'); dl.replaceChildren(); for (const l of allLines()) { const o = document.createElement('option'); o.value = l.name; dl.append(o); } }
 weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('stashWeight').append(o); }); $('stashWeight').value = weights[4];
 $('stashBrand').addEventListener('change', () => { // auto-fill weight and yardage from a known yarn
   const l = allLines().find(l => l.name.toLowerCase() === $('stashBrand').value.trim().toLowerCase()); if (!l) return;
   if (weights.includes(l.weight)) $('stashWeight').value = l.weight; if (l.yards) $('stashYards').value = l.yards; notify(`Filled in ${l.name}: ${l.weight.replace(/^\d • /, '')}, ${l.yards} yds per skein. Check your label.`);
 });
+
+// ---------- Ravelry yarn search (uses the same connector as the pattern import) ----------
+const RAV_W = { thread: 0, cobweb: 0, lace: 0, 'light fingering': 1, fingering: 1, sport: 2, dk: 3, worsted: 4, aran: 4, bulky: 5, 'super bulky': 6, jumbo: 7 };
+const ravW = n => { const k = String(n).toLowerCase().replace(/\s*\(.*\)/, '').trim(); return k in RAV_W ? weights[RAV_W[k]] : 'Unspecified'; };
+$('yarnSearch').onclick = async () => {
+  const q = $('stashBrand').value.trim(), conf = readStorage('bow-purl-ravelry', {}), box = $('yarnResults');
+  if (q.length < 2) { notify('Type a brand or yarn name first, e.g. Knitting for Olive.'); return; }
+  if (!/^https:\/\//i.test(conf.url || '')) { notify('Ravelry yarn search uses your Ravelry connector. Set it up in Pattern library → Connector settings.'); return; }
+  const btn = $('yarnSearch'); btn.disabled = true; btn.textContent = 'Searching…'; box.replaceChildren();
+  try {
+    const res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'yarns', query: q }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Error(data.error || (res.status === 400 ? 'Your Ravelry connector is out of date. Redeploy worker/ravelry-worker.js.' : `Yarn search failed (${res.status}).`));
+    const ys = (Array.isArray(data.yarns) ? data.yarns : []).filter(y => typeof y.name === 'string');
+    if (!ys.length) { textNode('p', 'No yarns found on Ravelry. Try just the brand name.', box).className = 'hint'; return; }
+    for (const y of ys.slice(0, 25)) {
+      const w = ravW(y.weight), yd = Number(y.yards) > 0 && Number(y.yards) < 10000 ? Number(y.yards) : null;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'yarn-hit'; box.append(b);
+      textNode('b', y.name.slice(0, 80), b); textNode('span', `${w.replace(/^\d • /, '')}${yd ? ` · ${yd} yds` : ''}${y.grams ? ` / ${y.grams} g` : ''}`, b);
+      b.onclick = () => {
+        $('stashBrand').value = y.name.slice(0, 80); if (w !== 'Unspecified') $('stashWeight').value = w; if (yd) $('stashYards').value = yd;
+        if (yd && w !== 'Unspecified' && !myYarns.some(m => m.name.toLowerCase() === y.name.toLowerCase())) { myYarns = [{ name: y.name.slice(0, 80), weight: w, yards: yd }, ...myYarns].slice(0, 300); writeStorage('bow-purl-yarns', myYarns); fillBrandList(); }
+        box.replaceChildren(); notify(`${y.name} filled in and saved to your yarn list.`);
+      };
+    }
+  } catch (err) { notify(err.message); } finally { btn.disabled = false; btn.textContent = '🔍 Ravelry'; }
+};
 
 // ---------- stash ----------
 function saveStash(next) { if (writeStorage('bow-purl-stash', next)) { stash = next; return true; } return false; }

@@ -28,6 +28,8 @@ The hero and each tab use the owner's own cat photos in `images/` (resized, with
 
 ## Yarn, stash and prices
 - **Yarn suggestions**: every pattern shows the yarn the designer used (from Ravelry, when listed) plus common brands for its weight.
+- **Yarn library**: 92 built-in yarns, including Knitting for Olive, Sandnes Garn, Drops, Isager, Brooklyn Tweed, Hedgehog Fibres, La Bien Aimée, Biches & Bûches, Jamieson's and more. Yardages and prices are approximate; KFO Merino and Heavy Merino were checked against retailer listings.
+- **Ravelry yarn search**: in My stash, tap 🔍 Ravelry to search Ravelry's whole yarn database (any brand). Picking a result fills in weight and yardage and saves that yarn, so it also shows up in suggestions for patterns of that weight. Uses the Ravelry connector; redeploy `worker/ravelry-worker.js` to enable it.
 - **My stash tab**: add brand, weight, yards per skein and skeins (pick a known yarn to auto-fill). It lists patterns from your library that each yarn covers, or all yarns of a weight combined, with "every size fits" or "smaller sizes fit" and leftovers.
 - **Prices tab**: built-in rough 2026 US Midwest averages per yard in budget, mid and premium tiers, used for cost estimates across the app. Import your own CSV (`yarn,Cascade 220,10.99,220` or `weight,Fingering,12,400`; price per skein); "Download template" shows the format. Brand yardages and prices are typical values; check ball bands and your shop.
 
@@ -38,7 +40,7 @@ The hero and each tab use the owner's own cat photos in `images/` (resized, with
 2. In the Worker's Settings → Variables add:
    - `ANTHROPIC_API_KEY` (as a secret) — from console.anthropic.com. **Or** for ChatGPT: `PROVIDER=openai`, `OPENAI_API_KEY` (secret) and `MODEL` (an OpenAI model name).
    - `ALLOWED_ORIGIN` = your Pages address, e.g. `https://yourname.github.io`
-   - `APP_TOKEN` = any random phrase (optional but recommended).
+   - `APP_TOKEN` (secret) = a random string of 16+ characters (required).
 3. Add a rate-limiting rule for the Worker and set a monthly spending limit with your AI provider.
 4. In the app: Chart studio → Design with AI → AI settings. Paste the Worker URL and app token, then Save.
 
@@ -48,13 +50,23 @@ The connector asks for original designs and validates the returned grid before t
 Ravelry requires API credentials, and they must not go in the public GitHub files, so a tiny connector holds them.
 1. Sign in to Ravelry and open https://www.ravelry.com/pro/developer. Create an app and choose **Basic Auth – read only**. Note the username and password it shows (these are API credentials, not your login).
 2. Cloudflare → Workers → Create Worker → paste `worker/ravelry-worker.js` → Deploy.
-3. Worker Settings → Variables: `RAVELRY_USER` and `RAVELRY_PASS` (as secrets, from step 1), `ALLOWED_ORIGIN` = your Pages address (e.g. `https://yourname.github.io`), `APP_TOKEN` = any random phrase (secret).
+3. Worker Settings → Variables: `RAVELRY_USER` and `RAVELRY_PASS` (as secrets, from step 1), `ALLOWED_ORIGIN` = your Pages address (e.g. `https://yourname.github.io`), `APP_TOKEN` (secret) = a random string of 16+ characters (required).
 4. In the app: Pattern library → Connector settings → paste the Worker URL and app token. Enter your Ravelry username, choose Favorites + library, and tap **Import from Ravelry**.
 
 Re-importing updates existing patterns without touching your notes. Imports up to 2,000 patterns. The library import includes single patterns (PDFs, purchases); patterns inside books and magazines in your Ravelry library aren't included, so favorite those individually or add them by hand. If your library is private, only favorites are imported. Patterns without yardage on Ravelry show "Yardage not listed"; tap Edit details to fill it in. Yardage ranges run from smallest to largest size. Use of the Ravelry API is subject to Ravelry's API terms; this read-only setup is intended for personal use.
 
 ## Design notes
 All motifs are original artwork. The app does not include licensed characters, game logos or emblems; the AI connector is instructed to make original designs in the same spirit if asked for one.
+
+## Security
+- No API keys or Ravelry credentials are in the site files; they live only in the Cloudflare Workers as secrets.
+- Both connectors refuse to run unless `ALLOWED_ORIGIN` and a 16+ character `APP_TOKEN` are set, check the token in constant time, and reject large requests.
+- The app token is stored in your browser on this device. Anyone with it can use your connectors, so don't share it. If it leaks, change `APP_TOKEN` in Cloudflare and re-enter it in the app.
+- **Add a rate-limiting rule** to each Worker (Cloudflare → Security → WAF → Rate limiting, e.g. 30 requests per minute) and set a **monthly spending cap** with your AI provider.
+- All pages on `yourname.github.io` share browser storage. Don't host other people's code under the same GitHub Pages address, or use a custom domain for this app.
+- A Content Security Policy blocks outside scripts. All user text is shown as plain text, and links are limited to http(s).
+- Imported backups and price files are validated before use.
+- Ravelry pattern photos load from Ravelry's servers, which see your IP address like any image on the web.
 
 ## Limits
 Patterns, stash and prices are stored in the browser on one device; backups include them. No accounts or sync. The float check is a guide, not a full stranded-knitting review. Test on a real phone and print once before sharing with customers.
