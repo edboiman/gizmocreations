@@ -85,19 +85,105 @@ function yarnLines(p, parent) { // designer's yarn + other suggestions + cost, u
   if (c) textNode('span', `${c} est. (${TIERS[prices.tier].split(' (')[0].toLowerCase()} yarn)`, parent).className = 'cost';
 }
 
-// ---------- brand menus ----------
-function allLines() { const out = []; for (const [w, rows] of Object.entries(YARN_BRANDS)) for (const r of rows) out.push({ name: `${r[0]} ${r[1]}`, weight: w, yards: r[2], fiber: r[3], price: r[4] }); for (const y of myYarns) if (!out.some(o => o.name.toLowerCase() === y.name.toLowerCase())) out.unshift({ name: y.name, weight: y.weight, yards: y.yards });
-  for (const c of prices.custom) if (!out.some(o => o.name.toLowerCase() === c.name.toLowerCase())) out.push(c); return out; }
-function fillBrandList() { const dl = $('brandList'); dl.replaceChildren(); for (const l of allLines()) { const o = document.createElement('option'); o.value = l.name; dl.append(o); } }
-weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('stashWeight').append(o); }); $('stashWeight').value = weights[4];
-$('stashBrand').addEventListener('change', () => { // auto-fill weight and yardage from a known yarn
-  const l = allLines().find(l => l.name.toLowerCase() === $('stashBrand').value.trim().toLowerCase()); if (!l) return;
-  if (weights.includes(l.weight)) $('stashWeight').value = l.weight; if (l.yards) $('stashYards').value = l.yards; notify(`Filled in ${l.name}: ${l.weight.replace(/^\d • /, '')}, ${l.yards} yds per skein. Check your label.`);
-});
-
-// ---------- Ravelry yarn search (uses the same connector as the pattern import) ----------
 const RAV_W = { thread: 0, cobweb: 0, lace: 0, 'light fingering': 1, fingering: 1, sport: 2, dk: 3, worsted: 4, aran: 4, bulky: 5, 'super bulky': 6, jumbo: 7 };
 const ravW = n => { const k = String(n).toLowerCase().replace(/\s*\(.*\)/, '').trim(); return k in RAV_W ? weights[RAV_W[k]] : 'Unspecified'; };
+
+// ---------- more widely sold yarns (big-box and craft-store staples; approximate) ----------
+const MORE_YARNS = {
+  '1 • Super fine / Fingering': [['Lion Brand', 'Truboo', 241, 'Rayon from bamboo', 7], ['Patons', 'Kroy Socks', 166, 'Wool / nylon', 6], ['Premier', 'Wool Free Sock', 462, 'Acrylic / nylon', 8], ['Scheepjes', 'Stone Washed', 142, 'Cotton / acrylic', 5]],
+  '2 • Fine / Sport': [['Lion Brand', 'Ice Cream', 503, 'Acrylic', 9], ['Scheepjes', 'Catona', 137, 'Cotton', 3.5], ['Patons', 'Astra', 133, 'Acrylic', 3]],
+  '3 • Light / DK': [['Caron', 'Simply Soft Light', 330, 'Acrylic', 6], ['Lion Brand', 'Mandala', 590, 'Acrylic', 10], ['Bernat', 'Softee Baby', 362, 'Acrylic', 6],
+    ['Loops & Threads', 'Snuggly Wuggly', 339, 'Acrylic / nylon', 6], ['Stylecraft', 'Special DK', 322, 'Acrylic', 4.5], ['Scheepjes', 'Colour Crafter', 328, 'Acrylic', 5], ['Cascade', '220 Superwash Merino', 220, 'Superwash merino', 12]],
+  '4 • Medium / Worsted / Aran': [['Caron', 'Simply Soft', 315, 'Acrylic', 6], ['Caron', 'One Pound', 812, 'Acrylic', 13], ['Bernat', 'Super Value', 426, 'Acrylic', 5],
+    ['Lion Brand', "Vanna's Choice", 170, 'Acrylic', 5], ['Lion Brand', 'Basic Stitch', 185, 'Acrylic', 4], ['Lion Brand', 'Heartland', 251, 'Acrylic', 6],
+    ['Red Heart', 'Soft', 256, 'Acrylic', 5], ['Red Heart', 'With Love', 370, 'Acrylic', 6], ['Loops & Threads', 'Impeccable', 285, 'Acrylic', 5],
+    ['Premier', 'Everyday Worsted', 180, 'Acrylic', 4.5], ['Patons', 'Classic Wool Worsted', 194, 'Wool', 8], ['Lily', "Sugar'n Cream", 120, 'Cotton', 3],
+    ['Knit Picks', 'Brava Worsted', 218, 'Acrylic', 4], ['Cascade', '220 Superwash', 220, 'Superwash wool', 12], ['Lion Brand', 'Wool-Ease Heathers', 197, 'Acrylic / wool', 6.5],
+    ['Paintbox', 'Simply Aran', 197, 'Acrylic', 4.5], ['Lion Brand', 'Jeans', 246, 'Acrylic', 7]],
+  '5 • Bulky': [['Lion Brand', 'Hometown', 64, 'Acrylic', 4.5], ['Caron', 'Big Cakes', 328, 'Acrylic', 11], ['Bernat', 'Softee Chunky Twist', 108, 'Acrylic', 5],
+    ['Lion Brand', 'Wool-Ease Chunky', 153, 'Acrylic / wool', 8], ['Loops & Threads', 'Charisma', 109, 'Acrylic', 4.5], ['Knit Picks', 'Brava Bulky', 136, 'Acrylic', 5]],
+  '6 • Super bulky': [['Bernat', 'Blanket Big Ball', 220, 'Polyester', 14], ['Lion Brand', 'Wool-Ease Thick & Quick Bonus Bundle', 212, 'Acrylic / wool', 17], ['Loops & Threads', 'Cozy Wool', 90, 'Acrylic / wool', 6], ['Red Heart', 'Grande', 46, 'Acrylic / wool', 7]],
+  '7 • Jumbo': [['Bernat', 'Alize Blanket-EZ', 7, 'Polyester', 12], ['Loops & Threads', 'Chunky Wool', 20, 'Wool', 15]]
+};
+for (const [w, rows] of Object.entries(MORE_YARNS)) YARN_BRANDS[w].push(...rows);
+
+// ---------- yarn menu, ordered by what you actually use ----------
+const lc = s => String(s).toLowerCase().trim();
+function usedYarns() { // yarns in your stash, then yarns designers used in your saved patterns (with counts)
+  const stashed = new Map(), inPatterns = new Map();
+  for (const s of stash) stashed.set(lc(s.brand), { name: s.brand, weight: s.weight, yards: s.yards });
+  for (const p of patterns) for (const y of p.yarns || []) { const k = lc(y); if (!stashed.has(k)) { const e = inPatterns.get(k) || { name: y, weight: p.weight, count: 0 }; e.count++; inPatterns.set(k, e); } }
+  return { stashed: [...stashed.values()], inPatterns: [...inPatterns.values()].sort((a, b) => b.count - a.count) };
+}
+function allLines() {
+  const out = [], seen = new Set(), add = (l, group) => { const k = lc(l.name); if (seen.has(k)) return; seen.add(k); const b = YARN_INDEX.get(k); out.push({ ...b, ...Object.fromEntries(Object.entries(l).filter(([, v]) => v)), group }); };
+  const u = usedYarns();
+  u.stashed.forEach(l => add(l, 'In your stash'));
+  u.inPatterns.forEach(l => add({ name: l.name, weight: l.weight }, 'Used in your patterns'));
+  myYarns.forEach(l => add(l, 'Saved from Ravelry'));
+  prices.custom.forEach(c => add(c, 'From your price list'));
+  for (const w of weights) for (const r of YARN_BRANDS[w] || []) add({ name: `${r[0]} ${r[1]}`, weight: w, yards: r[2], fiber: r[3], price: r[4] }, w);
+  return out;
+}
+const YARN_INDEX = new Map(); for (const [w, rows] of Object.entries(YARN_BRANDS)) for (const r of rows) YARN_INDEX.set(lc(`${r[0]} ${r[1]}`), { name: `${r[0]} ${r[1]}`, weight: w, yards: r[2], fiber: r[3], price: r[4] });
+function fillBrandList() {
+  const lines = allLines(), dl = $('brandList'), sel = $('yarnPick'); dl.replaceChildren(); sel.replaceChildren();
+  const first = document.createElement('option'); first.value = ''; first.textContent = `Choose from ${lines.length} yarns…`; sel.append(first);
+  let group = null, g;
+  for (const l of lines) {
+    if (l.group !== group) { group = l.group; g = document.createElement('optgroup'); g.label = /^\d •/.test(group) ? group : '★ ' + group; sel.append(g); }
+    const o = document.createElement('option'); o.value = l.name; o.textContent = l.name + (l.yards ? ` · ${l.yards} yd` : ''); g.append(o);
+    const d = document.createElement('option'); d.value = l.name; dl.append(d);
+  }
+}
+// common color names; colors you've used before for a yarn are suggested first
+const COMMON_COLORS = ['Natural', 'Ecru', 'Cream', 'White', 'Oatmeal', 'Light Grey', 'Charcoal', 'Black', 'Navy', 'Denim', 'Sky Blue', 'Teal', 'Forest Green', 'Sage', 'Olive', 'Mustard', 'Gold', 'Rust', 'Terracotta', 'Brick Red', 'Burgundy', 'Dusty Rose', 'Blush', 'Hot Pink', 'Lavender', 'Plum', 'Chocolate', 'Camel', 'Variegated', 'Speckled'];
+function colorsFor(name) {
+  const k = lc(name), mine = stash.filter(s => lc(s.brand) === k && s.color).map(s => s.color), anyMine = stash.filter(s => s.color).map(s => s.color);
+  const counts = new Map(); for (const c of [...mine, ...mine, ...anyMine]) counts.set(c, (counts.get(c) || 0) + 1);
+  return [...new Set([...[...counts.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]), ...COMMON_COLORS])];
+}
+function fillColors(name) {
+  const dl = $('colorList'), list = colorsFor(name); dl.replaceChildren();
+  for (const c of list.slice(0, 60)) { const o = document.createElement('option'); o.value = c; dl.append(o); }
+  const mine = stash.filter(s => lc(s.brand) === lc(name) && s.color);
+  if (!$('stashColor').value && mine.length) $('stashColor').value = mine[mine.length - 1].color; // last color you had of this yarn
+  else if (!$('stashColor').value) $('stashColor').placeholder = list[0];
+}
+weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('stashWeight').append(o); }); $('stashWeight').value = weights[4];
+function applyYarn(name) {
+  const l = allLines().find(l => lc(l.name) === lc(name)); fillColors(name); if (!l) return;
+  if (weights.includes(l.weight)) $('stashWeight').value = l.weight; if (l.yards) $('stashYards').value = l.yards;
+  notify(`${l.name}: ${l.weight.replace(/^\d • /, '')}${l.yards ? `, ${l.yards} yds per skein` : ''}. Check your label.`);
+}
+$('stashBrand').addEventListener('change', () => applyYarn($('stashBrand').value));
+$('yarnPick').onchange = () => { if (!$('yarnPick').value) return; $('stashBrand').value = $('yarnPick').value; $('stashColor').value = ''; applyYarn($('yarnPick').value); $('yarnPick').value = ''; };
+
+// ---------- import stash from Ravelry ----------
+$('stashImport').onclick = async () => {
+  const conf = readStorage('bow-purl-ravelry', {});
+  if (!conf.user || !/^https:\/\//i.test(conf.url || '')) { notify('Set up Ravelry first: Pattern library → Ravelry username and Connector settings.'); return; }
+  const btn = $('stashImport'); btn.disabled = true; btn.textContent = 'Importing…';
+  try {
+    const res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'stash', username: conf.user }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Error(data.error || `Stash import failed (${res.status}).`);
+    if (!Array.isArray(data.stash)) throw Error('Your Ravelry connector is out of date. Redeploy worker/ravelry-worker.js.');
+    const next = structuredClone(stash); let added = 0, updated = 0, skipped = 0;
+    for (const r of data.stash.slice(0, 500)) {
+      if (!Number.isInteger(r.id) || typeof r.name !== 'string' || !r.name.trim()) { skipped++; continue; }
+      let yards = Number(r.yards), skeins = Number(r.skeins);
+      if (!(skeins > 0) && Number(r.totalYards) > 0 && yards > 0) skeins = Math.round(Number(r.totalYards) / yards * 4) / 4;
+      if (!(yards > 0 && yards < 10000) || !(skeins > 0 && skeins < 1000)) { skipped++; continue; } // missing quantity on Ravelry
+      const item = { brand: r.name.slice(0, 80), weight: ravW(r.weight), yards: Math.round(yards), skeins: Math.round(skeins * 100) / 100, color: String(r.color || '').slice(0, 60), ravId: r.id };
+      const old = next.find(s => s.ravId === r.id);
+      if (old) { Object.assign(old, item); updated++; } else { next.push({ id: crypto.randomUUID(), ...item }); added++; }
+    }
+    if (saveStash(next)) { fillBrandList(); renderStash(); notify(`Ravelry stash: ${added} added, ${updated} updated${skipped ? `, ${skipped} skipped (no yardage or skein count on Ravelry)` : ''}${data.truncated ? '. Only the first 300 were read.' : '.'}`); }
+  } catch (err) { notify(err.message); } finally { btn.disabled = false; btn.textContent = '↻ Import stash from Ravelry'; }
+};
+
+// ---------- Ravelry yarn search (uses the same connector as the pattern import) ----------
 $('yarnSearch').onclick = async () => {
   const q = $('stashBrand').value.trim(), conf = readStorage('bow-purl-ravelry', {}), box = $('yarnResults');
   if (q.length < 2) { notify('Type a brand or yarn name first, e.g. Knitting for Olive.'); return; }
@@ -123,7 +209,7 @@ $('yarnSearch').onclick = async () => {
 };
 
 // ---------- stash ----------
-function saveStash(next) { if (writeStorage('bow-purl-stash', next)) { stash = next; return true; } return false; }
+function saveStash(next) { if (writeStorage('bow-purl-stash', next)) { stash = next; fillBrandList(); return true; } return false; }
 $('stashForm').onsubmit = e => {
   e.preventDefault();
   const brand = $('stashBrand').value.trim().slice(0, 80), yards = Number($('stashYards').value), skeins = Number($('stashSkeins').value);
@@ -138,7 +224,7 @@ function renderStash() {
   for (const s of stash) {
     const row = document.createElement('div'); row.className = 'stash-item'; list.append(row);
     const b = document.createElement('div'); row.append(b);
-    textNode('b', s.brand + (s.color ? ' · ' + s.color : ''), b);
+    textNode('b', s.brand + (s.color ? ' · ' + s.color : '') + (s.ravId ? ' ↻' : ''), b);
     textNode('span', `${s.weight.replace(/^\d • /, '')} · ${s.skeins} × ${s.yards} yds = ${fmt(s.skeins * s.yards)} yds`, b).className = 'muted';
     const act = document.createElement('div'); act.className = 'actions'; row.append(act);
     textNode('button', '−', act).onclick = () => { const next = structuredClone(stash), n = next.find(x => x.id === s.id); n.skeins = Math.max(0, +(n.skeins - 1).toFixed(2)); saveStash(next.filter(x => x.skeins > 0)); renderStash(); };
@@ -204,5 +290,5 @@ $('priceImport').onchange = async e => {
 };
 
 fillBrandList(); renderPrices();
-const _tab = tab; tab = id => { _tab(id); if (id === 'stash') renderStash(); if (id === 'prices') renderPrices(); };
+const _tab = tab; tab = id => { _tab(id); if (id === 'stash') { fillBrandList(); renderStash(); } if (id === 'prices') renderPrices(); };
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
