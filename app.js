@@ -1,5 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
+const val = (id, fallback = '') => $(id)?.value ?? fallback; // tolerate an outdated index.html
+window.addEventListener('error', () => { if (!$('shopWeight') || !$('ravInclude')) { const s = $('status'); if (s) s.textContent = 'Some app files are out of date. Re-upload ALL files from the latest ZIP, then refresh.'; } });
 const weights = ['0 • Lace','1 • Super fine / Fingering','2 • Fine / Sport','3 • Light / DK','4 • Medium / Worsted / Aran','5 • Bulky','6 • Super bulky','7 • Jumbo','Unspecified'];
 const HEX = /^#[\da-f]{6}$/i;
 let state = { cols: 32, rows: 32, name: 'My heart cardigan', bg: '#fff6f5', fg: '#cc4c76', ac: '#f2b84b', cells: [], row: 1 };
@@ -280,7 +282,7 @@ $('png').onclick = () => $('chart').toBlob(b => { if (b) download(b, 'bow-and-pu
 $('print').onclick = () => window.print();
 
 // ---------- tabs & library ----------
-function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === id)); if (id === 'library') renderLibrary(); if (id === 'shop') renderShop(); }
+function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === id)); if (id === 'library') renderLibrary(); if (id === 'shop') if ($('shopResults')) renderShop(); }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('saveChart').onclick = () => { const p = patterns.find(p => p.id === currentId); $('saveWeight').value = p?.weight || weights[3]; $('saveNotes').value = p?.notes || ''; $('saveDialog').showModal(); };
 $('cancelSave').onclick = () => $('saveDialog').close();
@@ -376,7 +378,7 @@ $('ravSync').onclick = async () => {
   const btn = $('ravSync'); btn.disabled = true; btn.textContent = 'Importing…';
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': token }, body: JSON.stringify({ username: user, include: $('ravInclude').value }), signal: ctrl.signal });
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': token }, body: JSON.stringify({ username: user, include: val('ravInclude', 'both') }), signal: ctrl.signal });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw Error(data.error || `The Ravelry connector returned an error (${res.status}).`);
     if (!Array.isArray(data.patterns)) throw Error('The Ravelry connector returned an unexpected response.');
@@ -389,7 +391,7 @@ $('ravSync').onclick = async () => {
       if (old) { // keep the knitter's own notes and any yardage they typed in
         const keepYards = old.yardsMin != null && fields.yardsMin == null;
         const was = old.ravFrom || 'favorite';
-        if ($('ravInclude').value !== 'both' && was !== fields.ravFrom) fields.ravFrom = 'both'; // a partial import never removes a tag
+        if (val('ravInclude', 'both') !== 'both' && was !== fields.ravFrom) fields.ravFrom = 'both'; // a partial import never removes a tag
         Object.assign(old, fields, keepYards ? { yardsMin: old.yardsMin, yardsMax: old.yardsMax } : {}); updated++;
       } else { next.push({ id, notes: '', ...fields }); added++; }
     }
@@ -402,6 +404,7 @@ $('ravSync').onclick = async () => {
 const YD_PER_M = 1.0936;
 function skeinYards() { const n = Number($('shopLen').value); if (!(n > 0 && n < 100000)) return 0; return $('shopUnit').value === 'm' ? n * YD_PER_M : n; }
 function renderShop() {
+  if (!$('shopResults')) return;
   const list = $('shopResults'); list.replaceChildren();
   const w = $('shopWeight').value, per = skeinYards(), have = Number($('shopHave').value) || 0;
   const matches = patterns.filter(p => p.weight === w || ($('shopUnspec').checked && p.weight === 'Unspecified'));
@@ -429,10 +432,12 @@ function renderShop() {
     if (have && sk && sk[0] > have) textNode('span', `Need ${sk[0] - have} more skein${sk[0] - have > 1 ? 's' : ''} for the smallest size`, body).className = 'warn';
   }
 }
+if ($('shopWeight')) {
 weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('shopWeight').append(o); });
 const shopPrefs = readStorage('bow-purl-shop', {});
 $('shopWeight').value = weights.includes(shopPrefs.w) ? shopPrefs.w : weights[1]; $('shopLen').value = shopPrefs.len || ''; $('shopUnit').value = shopPrefs.unit === 'm' ? 'm' : 'yd';
 for (const id of ['shopWeight', 'shopLen', 'shopUnit', 'shopHave', 'shopUnspec', 'shopFits']) $(id).addEventListener('input', () => { writeStorage('bow-purl-shop', { w: $('shopWeight').value, len: $('shopLen').value, unit: $('shopUnit').value }); renderShop(); });
+}
 
 // kitten photos: hide any slot whose file hasn't been added yet
 document.querySelectorAll('img.kitten').forEach(img => { img.onerror = () => img.closest('figure').classList.add('empty'); if (img.complete && !img.naturalWidth) img.onerror(); });
