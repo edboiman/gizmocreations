@@ -52,6 +52,42 @@ export default {
     const username = String(body.username || '').trim();
     if (!/^[A-Za-z0-9_\-.]{1,40}$/.test(username)) return reply({ error: 'Enter a valid Ravelry username.' }, 400);
 
+    // Stash: {action:'stash', username} -> the user's Ravelry stash with skeins, yardage and colorway
+    if (body.action === 'stash') {
+      const H = { headers: { Authorization: auth0 } }, u = encodeURIComponent(username);
+      try {
+        const ids = [];
+        for (let page = 1; page <= 5; page++) {
+          const r = await fetch(`${API}/people/${u}/stash/list.json?page_size=100&page=${page}`, H);
+          if (r.status === 404 || r.status === 403) return reply({ error: 'Ravelry stash not found or private.' }, 404);
+          if (!r.ok) return reply({ error: `Ravelry stash error (${r.status}).` }, 502);
+          const j = await r.json();
+          for (const st of j.stash || []) if (Number.isInteger(st.id)) ids.push(st.id);
+          if (!j.paginator || page >= j.paginator.last_page) break;
+        }
+        const out = [];
+        for (let i = 0; i < Math.min(ids.length, 300); i += 10) { // details in small parallel batches
+          const batch = await Promise.all(ids.slice(i, i + 10).map(id => fetch(`${API}/people/${u}/stash/${id}.json`, H).then(r => r.ok ? r.json() : null).catch(() => null)));
+          for (const j of batch) {
+            const st = j?.stash; if (!st) continue;
+            const y = st.yarn || {}, pk = (st.packs || [])[0] || {};
+            if (st.status_name && /used up|gifted|traded|sold/i.test(st.status_name)) continue;
+            const skeins = (st.packs || []).reduce((t, k) => t + (Number(k.skeins) || 0), 0);
+            out.push({
+              id: st.id,
+              name: `${y.yarn_company_name || st.yarn_company_name || ''} ${y.name || st.name || ''}`.trim().slice(0, 80),
+              weight: y.yarn_weight?.name || pk.yarn_weight?.name || '',
+              yards: Number(pk.yards_per_skein) || Number(y.yardage) || (skeins && Number(pk.total_yards) ? Number(pk.total_yards) / skeins : null),
+              skeins: skeins || null,
+              totalYards: (st.packs || []).reduce((t, k) => t + (Number(k.total_yards) || 0), 0) || null,
+              color: String(st.colorway_name || pk.colorway || '').slice(0, 60)
+            });
+          }
+        }
+        return reply({ stash: out, truncated: ids.length > 300 });
+      } catch { return reply({ error: 'Could not reach Ravelry.' }, 502); }
+    }
+
     const auth = 'Basic ' + btoa(`${env.RAVELRY_USER}:${env.RAVELRY_PASS}`);
     const get = async path => {
       const r = await fetch(API + path, { headers: { Authorization: auth } });
