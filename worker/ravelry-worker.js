@@ -76,6 +76,7 @@ export default {
             sizes: String(p.sizes_available || '').slice(0, 200),
             designer: String(p.pattern_author?.name || '').slice(0, 100),
             url: `https://www.ravelry.com/patterns/library/${p.permalink}`,
+            yarns: (p.packs || []).map(k => [k.yarn?.yarn_company_name, k.yarn?.name || k.yarn_name].filter(Boolean).join(' ')).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3).map(v => v.slice(0, 80)),
             photo: p.photos?.[0]?.small_url || p.photos?.[0]?.square_url || ''
           });
         }
