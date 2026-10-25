@@ -17,7 +17,9 @@ function validChart(s) {
     HEX.test(s.bg) && HEX.test(s.fg) && HEX.test(s.ac) && typeof s.name === 'string' && s.name.length <= 100 &&
     Number.isInteger(s.row) && s.row >= 1 && s.row <= s.rows;
 }
-function validPattern(p) { return p && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
+const optNum = v => v === undefined || v === null || (Number.isFinite(v) && v >= 0 && v < 100000);
+const optStr = (v, n) => v === undefined || (typeof v === 'string' && v.length <= n);
+function validPattern(p) { return p && optNum(p.yardsMin) && optNum(p.yardsMax) && optStr(p.yardageNote, 200) && optStr(p.sizes, 200) && optStr(p.designer, 100) && optStr(p.source, 20) && (p.photo === undefined || p.photo === '' || (typeof p.photo === 'string' && p.photo.length < 500 && /^https:\/\//.test(p.photo))) && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 100 && weights.includes(p.weight) && typeof p.notes === 'string' && p.notes.length <= 10000 && typeof p.link === 'string' && (!p.link || /^https?:\/\//i.test(p.link)) && (!p.chart || validChart(p.chart)); }
 
 patterns = readStorage('bow-purl-patterns', []);
 if (!Array.isArray(patterns) || !patterns.every(validPattern)) patterns = [];
@@ -288,25 +290,64 @@ function changeRow(n) { state.row = Math.max(1, Math.min(state.rows, state.row +
 $('prevRow').onclick = () => changeRow(-1); $('nextRow').onclick = () => changeRow(1); $('resetRow').onclick = () => changeRow(1 - state.row);
 function textNode(tag, text, parent) { const el = document.createElement(tag); el.textContent = text; parent.append(el); return el; }
 function thumb(chart) { const c = document.createElement('canvas'), s = Math.max(2, Math.floor(200 / Math.max(chart.cols, chart.rows))); c.width = chart.cols * s; c.height = chart.rows * s; const ctx = c.getContext('2d'), col = [chart.bg, chart.fg, chart.ac]; chart.cells.forEach((v, i) => { ctx.fillStyle = col[v]; ctx.fillRect((i % chart.cols) * s, Math.floor(i / chart.cols) * s, s, s); }); c.className = 'thumb'; return c; }
-function renderLibrary() {
-  const parent = $('patterns'); parent.replaceChildren();
-  const shown = patterns.filter(p => $('filter').value === 'all' || p.weight === $('filter').value);
-  if (!shown.length) { textNode('p', 'Your collection is waiting for its first pattern. Save a chart or add a pattern below.', parent); return; }
-  for (const p of shown) {
-    const card = document.createElement('article'); card.className = 'panel card'; parent.append(card);
-    if (p.chart) card.append(thumb(p.chart));
-    textNode('span', p.weight, card).className = 'eyebrow'; textNode('h2', p.name, card);
-    if (p.chart) textNode('p', `${p.chart.cols} stitches × ${p.chart.rows} rows · Row ${p.chart.row}`, card);
-    if (p.notes) textNode('p', p.notes, card);
-    if (p.link) { const a = textNode('a', 'Open pattern ↗', card); a.href = p.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-    const actions = document.createElement('div'); actions.className = 'actions'; card.append(actions);
-    if (p.chart) textNode('button', 'Open chart', actions).onclick = () => { snapshot(); state = structuredClone(p.chart); currentId = p.id; controls(); draw(); draft(); tab('studio'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-    textNode('button', 'Edit details', actions).onclick = () => { const name = window.prompt('Pattern name', p.name); if (name === null) return; const notes = window.prompt('Pattern notes', p.notes); if (notes === null) return; const next = structuredClone(patterns), n = next.find(x => x.id === p.id); n.name = name.slice(0, 100) || 'Untitled pattern'; n.notes = notes.slice(0, 10000); if (n.chart) n.chart.name = n.name; if (persist(next)) renderLibrary(); };
-    textNode('button', 'Delete', actions).onclick = () => { if (confirm(`Delete “${p.name}”? Export a backup first if you want to keep it.`) && persist(patterns.filter(x => x.id !== p.id))) { if (currentId === p.id) currentId = null; renderLibrary(); } };
-  }
+const fmt = n => Math.round(n).toLocaleString();
+function yardText(p) { if (p.yardsMin == null && p.yardsMax == null) return ''; const a = p.yardsMin ?? p.yardsMax, b = p.yardsMax ?? a; return a === b ? `${fmt(a)} yds` : `${fmt(a)}–${fmt(b)} yds`; }
+function patternCard(p, parent) {
+  const card = document.createElement('article'); card.className = 'panel card'; parent.append(card);
+  if (p.chart) card.append(thumb(p.chart));
+  else if (p.photo) { const im = document.createElement('img'); im.src = p.photo; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); card.append(im); }
+  const tag = textNode('span', p.source === 'ravelry' ? 'Ravelry favorite' : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
+  textNode('h2', p.name, card);
+  if (p.designer) textNode('p', 'by ' + p.designer, card).className = 'muted';
+  const y = yardText(p); if (y) textNode('p', '🧶 ' + y + (p.yardageNote ? ' · ' + p.yardageNote : ''), card).className = 'yards';
+  else textNode('p', 'Yardage not listed — tap Edit details to add it.', card).className = 'muted';
+  if (p.sizes) textNode('p', 'Sizes: ' + p.sizes, card).className = 'muted';
+  if (p.chart) textNode('p', `${p.chart.cols} stitches × ${p.chart.rows} rows · Row ${p.chart.row}`, card);
+  if (p.notes) textNode('p', p.notes, card);
+  if (p.link) { const a = textNode('a', p.source === 'ravelry' ? 'Open on Ravelry ↗' : 'Open pattern ↗', card); a.href = p.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+  const actions = document.createElement('div'); actions.className = 'actions'; card.append(actions);
+  if (p.chart) textNode('button', 'Open chart', actions).onclick = () => { snapshot(); state = structuredClone(p.chart); currentId = p.id; controls(); draw(); draft(); tab('studio'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  textNode('button', 'Edit details', actions).onclick = () => {
+    const name = window.prompt('Pattern name', p.name); if (name === null) return;
+    const yd = window.prompt('Yards needed (e.g. 450 or 400-1200; blank if unknown)', yardText(p).replace(/[^\d–-]/g, '').replace('–', '-')); if (yd === null) return;
+    const notes = window.prompt('Pattern notes', p.notes); if (notes === null) return;
+    const next = structuredClone(patterns), n = next.find(x => x.id === p.id);
+    n.name = name.slice(0, 100) || 'Untitled pattern'; n.notes = notes.slice(0, 10000); Object.assign(n, parseYards(yd)); if (n.chart) n.chart.name = n.name;
+    if (persist(next)) renderLibrary();
+  };
+  textNode('button', 'Delete', actions).onclick = () => { if (confirm(`Delete “${p.name}”? Export a backup first if you want to keep it.`) && persist(patterns.filter(x => x.id !== p.id))) { if (currentId === p.id) currentId = null; renderLibrary(); } };
 }
-$('filter').onchange = renderLibrary;
-$('addPattern').onsubmit = e => { e.preventDefault(); const link = $('patternLink').value.trim(); if (link && !/^https?:\/\//i.test(link)) { notify('Use an https:// or http:// pattern link.'); return; } const item = { id: crypto.randomUUID(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } };
+function parseYards(t) { const n = String(t).match(/\d[\d,]*/g)?.map(x => Number(x.replace(/,/g, ''))).filter(x => x < 100000) || []; return { yardsMin: n.length ? n[0] : null, yardsMax: n.length ? (n[1] ?? n[0]) : null }; }
+function renderLibrary() {
+  const parent = $('patterns'), summary = $('weightSummary'); parent.replaceChildren(); summary.replaceChildren();
+  const q = $('search').value.trim().toLowerCase(), src = $('sourceFilter').value;
+  const shown = patterns.filter(p => ($('filter').value === 'all' || p.weight === $('filter').value) && (src === 'all' || (src === 'ravelry') === (p.source === 'ravelry')) && (!q || (p.name + ' ' + (p.designer || '') + ' ' + p.notes).toLowerCase().includes(q)));
+  if (!shown.length) { textNode('p', patterns.length ? 'No patterns match these filters.' : 'Your collection is waiting for its first pattern. Import your Ravelry favorites, save a chart, or add a pattern below.', parent); return; }
+  const sort = $('sortBy').value;
+  const key = p => p.yardsMax ?? p.yardsMin ?? (sort === 'yardsAsc' ? Infinity : -1);
+  shown.sort(sort === 'name' ? (a, b) => a.name.localeCompare(b.name) : sort === 'yardsAsc' ? (a, b) => key(a) - key(b) : (a, b) => key(b) - key(a));
+  for (const w of weights) {
+    const group = shown.filter(p => p.weight === w); if (!group.length) continue;
+    const known = group.filter(p => p.yardsMin != null || p.yardsMax != null);
+    const lo = known.reduce((t, p) => t + (p.yardsMin ?? p.yardsMax), 0), hi = known.reduce((t, p) => t + (p.yardsMax ?? p.yardsMin), 0);
+    const avg = known.length ? known.reduce((t, p) => t + ((p.yardsMin ?? p.yardsMax) + (p.yardsMax ?? p.yardsMin)) / 2, 0) / known.length : 0;
+    const anchor = 'w' + weights.indexOf(w);
+    // summary table row
+    const tr = document.createElement('tr'); summary.append(tr);
+    const td = document.createElement('td'); const a = textNode('a', w, td); a.href = '#' + anchor; tr.append(td);
+    textNode('td', group.length, tr); textNode('td', known.length ? (lo === hi ? fmt(lo) : `${fmt(lo)}–${fmt(hi)}`) : '—', tr); textNode('td', known.length ? fmt(avg) : '—', tr);
+    // section
+    const sec = document.createElement('section'); sec.className = 'weight-group'; sec.id = anchor; parent.append(sec);
+    const h = document.createElement('div'); h.className = 'weight-head'; sec.append(h);
+    textNode('h2', w, h);
+    textNode('span', `${group.length} pattern${group.length > 1 ? 's' : ''}` + (known.length ? ` · ${lo === hi ? fmt(lo) : fmt(lo) + '–' + fmt(hi)} yds for all${known.length < group.length ? ` (${group.length - known.length} without yardage)` : ''}` : ''), h).className = 'pill';
+    const cards = document.createElement('div'); cards.className = 'cards'; sec.append(cards);
+    group.forEach(p => patternCard(p, cards));
+  }
+  $('summaryWrap').hidden = !summary.children.length;
+}
+for (const id of ['filter', 'sourceFilter', 'sortBy']) $(id).onchange = renderLibrary; $('search').oninput = renderLibrary;
+$('addPattern').onsubmit = e => { e.preventDefault(); const link = $('patternLink').value.trim(); if (link && !/^https?:\/\//i.test(link)) { notify('Use an https:// or http:// pattern link.'); return; } const item = { id: crypto.randomUUID(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link, ...parseYards($('patternYards').value) }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } };
 $('backup').onclick = () => download(new Blob([JSON.stringify({ app: 'bow-and-purl', version: 2, patterns, motifs: myMotifs }, null, 2)], { type: 'application/json' }), 'bow-and-purl-backup.json');
 $('restore').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
@@ -320,6 +361,39 @@ $('restore').onchange = async e => {
     if (m && writeStorage('bow-purl-motifs', nextM)) { myMotifs = nextM; buildMotifMenu($('motif').value); }
     if (persist([...patterns, ...added])) { renderLibrary(); notify(`Restored ${added.length} new patterns and ${m} motifs. Existing items were kept.`); }
   } catch (err) { notify(err.message); } finally { e.target.value = ''; }
+};
+
+// ---------- Ravelry favorites ----------
+const RAV_WEIGHT = { thread: 0, cobweb: 0, lace: 0, 'light fingering': 1, fingering: 1, sport: 2, dk: 3, worsted: 4, aran: 4, bulky: 5, 'super bulky': 6, jumbo: 7 };
+function ravWeight(name) { const k = String(name).toLowerCase().replace(/\s*\(.*\)/, '').trim(); return k in RAV_WEIGHT ? weights[RAV_WEIGHT[k]] : 'Unspecified'; }
+const rav = readStorage('bow-purl-ravelry', {});
+$('ravUser').value = rav.user || ''; $('ravUrl').value = rav.url || ''; $('ravToken').value = rav.token || '';
+$('ravSync').onclick = async () => {
+  const user = $('ravUser').value.trim(), url = $('ravUrl').value.trim(), token = $('ravToken').value.trim();
+  if (!user) { notify('Enter your Ravelry username.'); return; }
+  if (!/^https:\/\//i.test(url)) { notify('Add your Ravelry connector URL (https://…). See the README.'); $('ravSettings').open = true; return; }
+  writeStorage('bow-purl-ravelry', { user, url, token });
+  const btn = $('ravSync'); btn.disabled = true; btn.textContent = 'Importing…';
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
+  try {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': token }, body: JSON.stringify({ username: user }), signal: ctrl.signal });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Error(data.error || `The Ravelry connector returned an error (${res.status}).`);
+    if (!Array.isArray(data.patterns)) throw Error('The Ravelry connector returned an unexpected response.');
+    let added = 0, updated = 0; const next = structuredClone(patterns);
+    for (const r of data.patterns.slice(0, 500)) {
+      if (!Number.isInteger(r.id)) continue;
+      const num = v => Number.isFinite(v) && v >= 0 && v < 100000 ? v : null, str = (v, n) => String(v || '').slice(0, n);
+      const fields = { name: str(r.name, 100) || 'Untitled pattern', weight: ravWeight(r.weight), yardsMin: num(r.yardsMin), yardsMax: num(r.yardsMax), yardageNote: str(r.yardageNote, 200), sizes: str(r.sizes, 200), designer: str(r.designer, 100), link: /^https:\/\/www\.ravelry\.com\//.test(r.url) ? r.url : '', photo: /^https:\/\//.test(r.photo || '') ? str(r.photo, 499) : '', source: 'ravelry' };
+      const id = 'rav-' + r.id, old = next.find(p => p.id === id);
+      if (old) { // keep the knitter's own notes and any yardage they typed in
+        const keepYards = old.yardsMin != null && fields.yardsMin == null;
+        Object.assign(old, fields, keepYards ? { yardsMin: old.yardsMin, yardsMax: old.yardsMax } : {}); updated++;
+      } else { next.push({ id, notes: '', ...fields }); added++; }
+    }
+    if (persist(next)) { $('filter').value = 'all'; $('sourceFilter').value = 'all'; renderLibrary(); notify(`Ravelry: ${added} new and ${updated} updated favorites.`); }
+  } catch (err) { notify(err.name === 'AbortError' ? 'Ravelry took too long. Try again.' : err.message); }
+  finally { clearTimeout(t); btn.disabled = false; btn.textContent = '↻ Import my favorites'; }
 };
 
 // kitten photos: hide any slot whose file hasn't been added yet
