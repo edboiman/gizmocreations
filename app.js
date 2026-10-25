@@ -375,7 +375,7 @@ $('restore').onchange = async e => {
     }
     if (m && writeStorage('bow-purl-motifs', nextM)) { myMotifs = nextM; buildMotifMenu($('motif').value); }
     let priceNote = '';
-    if (data.prices && !prices.custom.length && prices.source.startsWith('Built-in') && writeStorage('bow-purl-prices', data.prices)) { prices = structuredClone(data.prices); renderPrices(); priceNote = ' Price settings restored.'; }
+    if (data.prices && !prices.custom.length && !prices.reviewedAt && !Object.keys(prices.weightMeta || {}).length && prices.source.startsWith('Built-in') && writeStorage('bow-purl-prices', data.prices)) { prices = structuredClone(data.prices); renderPrices(); priceNote = ' Price settings restored.'; }
     else if (data.prices) priceNote = ' Existing price settings kept.';
     if (Array.isArray(data.yarns)) { const nextYarns = [...myYarns]; for (const y of data.yarns.slice(0,300)) if (validYarn(y) && !nextYarns.some(n => n.name.toLowerCase() === y.name.toLowerCase())) nextYarns.push(y); if (writeStorage('bow-purl-yarns', nextYarns.slice(0,300))) myYarns = nextYarns.slice(0,300); }
     if (data.seasonPrefs && ['north','south'].includes(data.seasonPrefs.hemisphere) && !readStorage('bow-purl-season-prefs', null) && writeStorage('bow-purl-season-prefs', { hemisphere: data.seasonPrefs.hemisphere })) $('ideaHemisphere').value = data.seasonPrefs.hemisphere;

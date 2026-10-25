@@ -42,3 +42,8 @@ nav{display:flex;gap:10px;margin:28px 0;border-bottom:1px solid var(--line);padd
 @media(max-width:380px){.studio-companion .companion-copy p{display:none}.cat-scene{width:110px}.companion-copy b{font-size:14px}.hero{padding:24px 18px}.hero-photos{width:95px}.hero h1{font-size:38px}.idea-card-top{gap:10px}.idea-preview{width:88px;height:auto}}
 @media(prefers-reduced-motion:reduce){.cat-button *{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 @media print{.studio-companion,.month-story,.idea-cards{display:none}}
+
+/* One fixed black heart on every navigation tab, independent of emoji fonts. */
+nav button{display:inline-flex;align-items:center;gap:7px}.tab-heart{width:13px;height:13px;fill:#171117;flex-shrink:0}
+.price-review{background:#fbeef2}.price-review h3{margin-bottom:8px}.price-review-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.price-review-head p{margin:6px 0;line-height:1.5}.price-instructions{padding-left:22px;font-size:14px;line-height:1.7}.price-instructions li+li{margin-top:10px}.price-review summary{font-weight:bold}.price-due{display:inline-block;margin-left:6px;font-size:10px;background:#f9e5cb;color:#714018;border-radius:12px;padding:4px 7px}.price-quote{border-top:1px solid var(--line);padding:12px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}.price-quote>div{min-width:0}.price-quote p{margin:4px 0;overflow-wrap:anywhere}.price-quote .muted{line-height:1.5}#priceUpdateForm .pair>*{min-width:0}
+@media(max-width:760px){.price-review-head,.price-quote{align-items:start;flex-direction:column}.summary th:last-child,.summary td:last-child{min-width:130px}.price-review-head button{width:100%}}

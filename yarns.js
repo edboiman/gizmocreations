@@ -56,6 +56,10 @@ const DEFAULT_PRICES = {
 const TIERS = ['Budget (acrylic)', 'Mid (wool / blends)', 'Premium (indie, merino)'];
 
 function validPrices(p) {
+  const metadata = m => m == null || (typeof m === 'object' && (m.checkedAt == null || validPriceDate(m.checkedAt)) && (m.source === undefined || (typeof m.source === 'string' && m.source.length <= 120)));
+  if (p?.reviewedAt != null && !validPriceDate(p.reviewedAt)) return false;
+  if (p?.weightMeta !== undefined && (!p.weightMeta || typeof p.weightMeta !== 'object' || Array.isArray(p.weightMeta) || !Object.entries(p.weightMeta).every(([w,rows]) => weights.includes(w) && Array.isArray(rows) && rows.length === 3 && rows.every(metadata)))) return false;
+  if (Array.isArray(p?.custom) && !p.custom.every(metadata)) return false;
   return !!p && Number.isInteger(p.tier) && p.tier >= 0 && p.tier <= 2 && typeof p.source === 'string' && p.source.length <= 200 && p.perYard && weights.every(w => Array.isArray(p.perYard[w]) && p.perYard[w].length === 3 && p.perYard[w].every(n => Number.isFinite(n) && n > 0 && n < 1000)) && Array.isArray(p.custom) && p.custom.length <= 500 && p.custom.every(c => c && typeof c.name === 'string' && c.name.length <= 80 && Number.isFinite(c.price) && c.price > 0 && c.price < 1000 && Number.isFinite(c.yards) && c.yards > 0 && c.yards < 10000 && weights.includes(c.weight));
 }
 const validYarn = y => y && typeof y.name === 'string' && y.name.length <= 80 && weights.includes(y.weight) && Number.isFinite(y.yards) && y.yards > 0 && y.yards < 10000;
@@ -305,40 +309,131 @@ function renderStash() {
 }
 $('stashCombine').onchange = renderStash;
 
-// ---------- prices ----------
+// ---------- prices & monthly reviews ----------
+function localPriceDate(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+function validPriceDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(value + 'T12:00:00'); return Number.isFinite(date.getTime()) && localPriceDate(date) === value;
+}
+function priceReviewInfo(p, now = new Date()) {
+  const today = localPriceDate(now), reviewed = validPriceDate(p.reviewedAt) && p.reviewedAt <= today ? p.reviewedAt : null;
+  const next = reviewed ? new Date(Number(reviewed.slice(0,4)), Number(reviewed.slice(5,7)),1,12) : null;
+  return {due:!reviewed || reviewed.slice(0,7) !== today.slice(0,7), reviewed, next:next ? localPriceDate(next) : null};
+}
+function priceDateText(value) { return validPriceDate(value) ? new Date(value+'T12:00:00').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : 'Not dated'; }
 function renderPrices() {
   $('priceTier').value = String(prices.tier); $('priceSource').textContent = prices.source;
   const tb = $('priceTable'); tb.replaceChildren();
-  for (const w of weights.slice(0, 8)) {
-    const tr = document.createElement('tr'); tb.append(tr); textNode('td', w.replace(/^\d • /, ''), tr);
-    prices.perYard[w].forEach((v, i) => textNode('td', `$${v.toFixed(3)}/yd`, tr).className = i === prices.tier ? 'on' : '');
-    textNode('td', money(prices.perYard[w][prices.tier] * 220), tr);
+  for (const w of weights.slice(0,8)) {
+    const tr = document.createElement('tr'); tb.append(tr); textNode('td', w.replace(/^\d • /,''), tr);
+    prices.perYard[w].forEach((v,i) => textNode('td', `$${v.toFixed(3)}/yd`, tr).className = i === prices.tier ? 'on' : '');
+    textNode('td', money(prices.perYard[w][prices.tier]*220), tr);
+    const meta = prices.weightMeta?.[w]?.[prices.tier];
+    const date = textNode('td', priceDateText(meta?.checkedAt), tr); if (meta?.source) date.title = meta.source;
   }
-  $('customCount').textContent = prices.custom.length ? `${prices.custom.length} imported yarn prices in use.` : '';
+  const review = priceReviewInfo(prices);
+  $('priceReviewStatus').textContent = review.due ? 'Price review due for ' + new Date().toLocaleDateString(undefined,{month:'long',year:'numeric'}) : 'Your monthly review is recorded.';
+  $('priceReviewDates').textContent = review.reviewed ? `Last review: ${priceDateText(review.reviewed)}. Next due: ${priceDateText(review.next)}. Individual price dates are shown separately.` : 'No monthly review recorded yet. Your existing prices are kept until you edit them.';
+  $('priceReviewDone').textContent = review.due ? "Finish this month's review" : 'Record review again';
+  $('customCount').textContent = `${prices.custom.length} named yarn quote${prices.custom.length === 1 ? '' : 's'} saved for reference. Project cost ranges use the weight estimates above.`;
+  const quotes = $('customPrices'); quotes.replaceChildren();
+  for (const c of prices.custom) {
+    const row = document.createElement('div'); row.className = 'price-quote'; quotes.append(row);
+    const body = textNode('div','',row); textNode('b',c.name,body);
+    textNode('p',`${money(c.price)} / ${fmt(c.yards)} yds · ${c.weight.replace(/^\d • /,'')}`,body);
+    textNode('p',`${priceDateText(c.checkedAt)}${c.source ? ' · '+c.source : ''}`,body).className = 'muted';
+    textNode('button','Edit quote',row).onclick = () => {
+      $('priceUpdateKind').value='yarn'; updatePriceKind(); $('priceUpdateName').value=c.name; $('priceUpdateWeight').value=c.weight; $('priceUpdateCost').value=c.price; $('priceUpdateYards').value=c.yards; $('priceUpdateDate').value=c.checkedAt || localPriceDate(); $('priceUpdateSource').value=c.source || ''; $('priceUpdateName').focus();
+    };
+  }
 }
-function savePrices() { writeStorage('bow-purl-prices', prices); renderPrices(); if (!$('library').hidden) renderLibrary(); }
-$('priceTier').onchange = () => { prices.tier = Number($('priceTier').value); savePrices(); };
-$('priceReset').onclick = () => { if (!confirm('Go back to the built-in price estimates? Imported prices will be removed.')) return; prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: prices.tier, source: 'Built-in 2026 US Midwest estimates' }; savePrices(); fillBrandList(); };
-$('priceTemplate').onclick = () => {
-  const rows = [['type', 'name or weight', 'price', 'yards per skein'], ['weight', 'Fingering', '12', '400'], ['yarn', 'Cascade 220', '10.99', '220'], ['yarn', 'Malabrigo Rios', '17.50', '210']];
-  download(new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' }), 'yarn-prices-template.csv');
-};
-$('priceImport').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  try {
-    if (f.size > 2 * 1024 * 1024) throw Error('Price file is too large (2 MB max).');
-    const lines = (await f.text()).split(/\r?\n/).map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g, ''))).filter(r => r.length >= 4);
-    let w = 0, y = 0; const custom = [...prices.custom], per = structuredClone(prices.perYard);
-    for (const [type, name, price, yards] of lines) {
-      const pr = Number(String(price).replace(/[$]/g, '')), yd = Number(yards); if (!(pr > 0 && pr < 1000 && yd > 0 && yd < 10000)) continue;
-      if (/^weight$/i.test(type)) { const wt = weights.find(x => x.toLowerCase().includes(name.toLowerCase())); if (wt && wt !== 'Unspecified') { per[wt] = per[wt].slice(); per[wt][prices.tier] = pr / yd; w++; } }
-      else if (/^yarn$/i.test(type) && name) { const n = name.slice(0, 80), i = custom.findIndex(c => c.name.toLowerCase() === n.toLowerCase()); const known = allLines().find(l => l.name.toLowerCase() === n.toLowerCase()); const item = { name: n, price: pr, yards: yd, weight: known?.weight || 'Unspecified' }; i >= 0 ? custom[i] = item : custom.push(item); y++; }
+function commitPrices(next) {
+  if (!validPrices(next)) { notify('These price settings are invalid. Your saved prices were kept.'); return false; }
+  if (!writeStorage('bow-purl-prices',next)) return false;
+  prices=next; renderPrices(); fillBrandList(); if (!$('library').hidden) renderLibrary(); return true;
+}
+function resolvePriceWeight(name) {
+  const text=String(name).trim().toLowerCase();
+  return weights.find(w => w.toLowerCase() === text || w.replace(/^\d • /,'').toLowerCase() === text) || ({lace:weights[0],fingering:weights[1],'super fine':weights[1],sport:weights[2],fine:weights[2],dk:weights[3],light:weights[3],worsted:weights[4],aran:weights[4],medium:weights[4],bulky:weights[5],'super bulky':weights[6],jumbo:weights[7]})[text];
+}
+function parsePriceCSV(text) {
+  const rows=[]; let row=[],cell='',quoted=false;
+  for (let i=0;i<text.length;i++) {
+    const ch=text[i];
+    if (ch==='"') { if (quoted && text[i+1]==='"') {cell+='"';i++;} else if (quoted || !cell.trim()) quoted=!quoted; else throw Error('Quote inside an unquoted CSV cell.'); }
+    else if (!quoted && ch===',') {row.push(cell.trim());cell='';}
+    else if (!quoted && (ch==='\r' || ch==='\n')) { if(ch==='\r' && text[i+1]==='\n')i++;row.push(cell.trim());if(row.some(Boolean))rows.push(row);row=[];cell=''; }
+    else cell+=ch;
+  }
+  if (quoted) throw Error('A quoted CSV cell is not closed.');
+  row.push(cell.trim());if(row.some(Boolean))rows.push(row);return rows;
+}
+function encodePriceCSV(rows) { return rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'); }
+function priceCSVRows(p) {
+  const rows=[['type','name','price','yards','weight','tier','source','checked']];
+  for (const w of weights) for (let tier=0;tier<3;tier++) {
+    const meta=p.weightMeta?.[w]?.[tier];
+    const yards = p.perYard[w][tier]*220 < 1000 ? 220 : 1;
+    rows.push(['weight',w,(p.perYard[w][tier]*yards).toFixed(8),yards,w,['budget','mid','premium'][tier],meta?.source || '',meta?.checkedAt || '']);
+  }
+  for (const c of p.custom) rows.push(['yarn',c.name,c.price,c.yards,c.weight,'',c.source || '',c.checkedAt || '']);
+  return rows;
+}
+function mergePriceCSV(base, rows, knownYarns = [], today = localPriceDate()) {
+  const next=structuredClone(base); next.weightMeta ||= {};
+  let changedWeights=0,changedYarns=0,skipped=0;
+  for (const row of rows) {
+    const [rawType,rawName,rawPrice,rawYards,rawWeight,rawTier,rawSource,rawChecked]=row;
+    const type=String(rawType||'').toLowerCase(); if(type==='type')continue;
+    const name=String(rawName||'').trim(), price=Number(String(rawPrice||'').replace(/^\$/,'')), yards=Number(rawYards);
+    const checkedAt=String(rawChecked||'').trim(),source=String(rawSource||'').slice(0,120);
+    if (!name || name.length>80 || !['weight','yarn'].includes(type) || !(price>0 && price<1000 && yards>0 && yards<10000) || (checkedAt && (!validPriceDate(checkedAt) || checkedAt>today))) {skipped++;continue;}
+    if(type==='weight') {
+      const w=resolvePriceWeight(rawWeight || name), tierText=String(rawTier??'').trim().toLowerCase();
+      const tier=tierText==='' ? base.tier : ({budget:0,mid:1,'mid-range':1,premium:2,'0':0,'1':1,'2':2})[tierText];
+      if(!w || tier===undefined) {skipped++;continue;}
+      next.perYard[w][tier]=price/yards;
+      next.weightMeta[w] ||= [null,null,null]; next.weightMeta[w][tier]={checkedAt:checkedAt||null,source};changedWeights++;
+    } else {
+      const index=next.custom.findIndex(c=>c.name.toLowerCase()===name.toLowerCase());
+      const weight=rawWeight ? resolvePriceWeight(rawWeight) : next.custom[index]?.weight || knownYarns.find(y=>y.name.toLowerCase()===name.toLowerCase())?.weight || 'Unspecified';
+      if (!weight || (index<0 && next.custom.length>=500)) {skipped++;continue;}
+      const quote={name,price,yards,weight,checkedAt:checkedAt||null,source};
+      index<0 ? next.custom.push(quote) : next.custom[index]=quote;changedYarns++;
     }
-    if (!w && !y) throw Error('No prices found. Download the template to see the format.');
-    prices = { ...prices, perYard: per, custom: custom.slice(0, 500), source: `Imported ${new Date().toLocaleDateString()} (${f.name.slice(0, 40)})` };
-    savePrices(); fillBrandList(); notify(`Imported ${w} weight averages and ${y} yarn prices.`);
-  } catch (err) { notify(err.message); } finally { e.target.value = ''; }
+  }
+  if (changedWeights || changedYarns) next.source='Your saved prices and retained estimates';
+  return {next,changedWeights,changedYarns,skipped};
+}
+weights.forEach(w=>{const o=document.createElement('option');o.value=w;o.textContent=w;$('priceUpdateWeight').append(o);});
+$('priceUpdateWeight').value=weights[4];$('priceUpdateTier').value=String(prices.tier);$('priceUpdateDate').value=localPriceDate();$('priceUpdateDate').max=localPriceDate();
+function updatePriceKind() { const yarn=$('priceUpdateKind').value==='yarn';$('priceYarnLabel').hidden=!yarn;$('priceUpdateName').required=yarn;$('priceUpdateTier').disabled=yarn; }
+$('priceUpdateKind').onchange=updatePriceKind;
+$('priceUpdateForm').onsubmit=e=>{
+  e.preventDefault();
+  const date=$('priceUpdateDate').value;
+  if(!validPriceDate(date) || date>localPriceDate()) {notify('Choose a valid date on or before today.');return;}
+  const type=$('priceUpdateKind').value, weight=$('priceUpdateWeight').value;
+  const rows=[[type,type==='weight'?weight:$('priceUpdateName').value.trim(),$('priceUpdateCost').value,$('priceUpdateYards').value,weight,$('priceUpdateTier').value,$('priceUpdateSource').value,date]];
+  const result=mergePriceCSV(prices,rows,allLines());
+  if(result.skipped || (!result.changedWeights && !result.changedYarns)) {notify('Enter a yarn name, a price below $1,000 and yardage below 10,000.');return;}
+  if(commitPrices(result.next)) notify(type==='weight'?'Weight estimate saved. App cost ranges now use the updated price.':'Yarn quote saved. Weight estimates are edited separately.');
 };
+$('priceReviewDone').onclick=()=>{if(commitPrices({...prices,reviewedAt:localPriceDate()}))notify('Monthly review recorded. Your next review is due on the first of next month.');};
+$('priceTier').onchange=()=>commitPrices({...prices,tier:Number($('priceTier').value)});
+$('priceReset').onclick=()=>{if(confirm('Return to built-in estimates and remove saved quotes and review dates?'))commitPrices({perYard:structuredClone(DEFAULT_PRICES),custom:[],tier:prices.tier,source:'Built-in 2026 US Midwest estimates'});};
+$('priceExport').onclick=()=>download(new Blob([encodePriceCSV(priceCSVRows(prices))],{type:'text/csv;charset=utf-8'}),'bow-and-purl-prices-'+localPriceDate()+'.csv');
+$('priceTemplate').onclick=()=>download(new Blob([encodePriceCSV([['type','name','price','yards','weight','tier','source','checked'],['weight','Fingering','12','400','Fingering','mid','Example only',''],['yarn','Cascade 220','10.99','220','Worsted','','Example only','']])],{type:'text/csv;charset=utf-8'}),'yarn-prices-example.csv');
+$('priceImport').onchange=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try {
+    if(file.size>2*1024*1024)throw Error('Price file is too large (2 MB maximum).');
+    const result=mergePriceCSV(prices,parsePriceCSV((await file.text()).replace(/^\uFEFF/,'')),allLines());
+    if(!result.changedWeights && !result.changedYarns)throw Error('No valid price rows found. Use the example template and check the column order.');
+    if(commitPrices(result.next)){$('priceImportResult').textContent=`Updated ${result.changedWeights} weight/tier estimates and ${result.changedYarns} yarn quotes.${result.skipped?' Skipped '+result.skipped+' invalid rows.':''} Other prices and your review date were kept.`;notify('Price CSV imported. Check the results, then finish your monthly review when ready.');}
+  } catch(err){$('priceImportResult').textContent=err.message;notify(err.message);}finally{e.target.value='';}
+};
+window.addEventListener('focus',()=>{$('priceUpdateDate').max=localPriceDate();renderPrices();});
 
 fillBrandList(); renderPrices();
 const _tab = tab; tab = id => { _tab(id); if (id === 'stash') { fillBrandList(); renderStash(); } if (id === 'prices') renderPrices(); };

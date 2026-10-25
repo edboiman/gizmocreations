@@ -1,4 +1,4 @@
-# Bow & Purl v3 — cats, monthly ideas and complete stash imports
+# Bow & Purl v3.1 — matching hearts and monthly price reviews
 A phone-friendly knitting colorwork studio. Static HTML, CSS and JavaScript — no build step. Runs on GitHub Pages.
 
 ## Updating your existing app
@@ -11,6 +11,24 @@ A phone-friendly knitting colorwork studio. Static HTML, CSS and JavaScript — 
 6. Open **My stash → Import stash from Ravelry** again. Existing imported records update; missing amount details remain visible as **unknown**. The website change fixes skipping incomplete entries even with the previous stash-capable Worker; the updated Worker also improves partial-pack totals and reports failed detail requests.
 
 For a new repository, use Settings → Pages → Deploy from a branch → main → / (root).
+
+## New in v3.1
+
+- Every navigation tab uses the same fixed, solid black heart. The icon is vector artwork so device emoji fonts cannot turn it into a colored emoji.
+- **Prices → Monthly price review** shows the last review and next due date. Reviews become due on the first of the following calendar month. This works when you open the app; it does not send background notifications or automatically fetch shop prices.
+- Enter a current price per skein and label yardage directly in **Update a price**. Choose **Weight estimate** to change app cost estimates for that weight and tier. Choose **Named yarn quote** to keep a dated reference quote for a particular yarn. Existing custom quotes have Edit quote buttons.
+- Each edited weight/tier estimate and yarn quote keeps a date checked and optional shop/source. Finishing a monthly review records the overall review without changing individual price dates or inventing new prices.
+- **Download current prices CSV** preserves all weight tiers, named quotes, source notes and checked dates. Four-column CSVs from earlier versions still import into the selected estimate tier.
+
+### Monthly price-update instructions
+
+1. Open **Prices** at the start of each month. Check your usual shop's regular prices or a recent receipt for yarns you actually use. Record the price per skein in USD and yards per skein. For meters, multiply by 1.0936 to get yards. Checking a shop website needs internet; an existing receipt can be used offline.
+2. Update a few prices with the form. For a weight estimate, use a representative skein for that weight and budget/mid/premium tier. The price divided by its yardage becomes the new price per yard used for project estimates. Named yarn quotes are stored for reference; they do not automatically replace a weight average.
+3. For many prices, download the current CSV, open it in a spreadsheet, edit the price and yardage cells, and save as CSV. Preserve the column order: `type,name,price,yards,weight,tier,source,checked`. Valid tiers are `budget`, `mid`, `premium` (or 0/1/2); dates use `YYYY-MM-DD`. Only change the checked date for rows you really checked. Re-import merges matching rows and retains other saved prices. Invalid rows are counted and skipped.
+4. After reviewing your usual prices, click **Finish this month's review**. The next review becomes due on the first of the next month. This records a manual check; it does not update prices itself.
+5. Export a backup from Pattern library. Dates, notes, prices and review status are included. Price files and backups are per device; use them to transfer updates to another phone or browser.
+
+This release needs only a website-file update. **No new Cloudflare Worker deployment is needed if you already installed the v3 Worker.** After uploading the new files, open the app online once to let the offline update download, close every Bow & Purl tab/home-screen window, then reopen it. If the previous version remains, repeat closing and reopening after the download finishes. Do not clear site data to update.
 
 ## New in v3
 
@@ -38,7 +56,7 @@ Monthly ideas are bundled in `seasonal.js`; there is no AI call, subscription or
 
 The app stays buildless: plain HTML/CSS/JavaScript. All new assets are local, with no downloaded animation library or web fonts. The Worker scripts are deployed separately and are not part of the offline cache.
 
-## Validation for this update
+## Validation for v3
 
 Checked the desktop and 390px phone layouts; saving unknown stash amounts, editing to fractional skeins, stash matching, saving ideas, chart setup/generation/undo; JavaScript syntax; and regression fixtures for incomplete/repeated imports, local corrections, backup restore, all 12 months and both hemispheres, and partial Ravelry pack totals. A cache test verified offline navigation and asset loading at a GitHub Pages-style subpath with the network disabled. The internal preview uses HTTP, so actual service-worker installation and airplane-mode reopening must be checked on your published HTTPS app. No live Ravelry account credentials were used in testing.
 
@@ -112,3 +130,6 @@ The app now says what went wrong. Common causes:
 - **"app token doesn't match"**: the token in the app must equal `APP_TOKEN` in Cloudflare.
 - **"stash is private" / "empty stash"**: the connector uses read-only keys, which I believe can only read what you've made public. Set your stash (and favorites/library) to visible in Ravelry → Settings → Privacy, import, then set it back.
 - Settings are saved as you type, so you no longer need to run the pattern import first.
+
+## Validation for v3.1
+Checked direct price edits and review dates in the browser; legacy and extended CSV round-trips across all tiers; quoted yarn names; invalid rows; month/year review rollover; backup metadata; and JavaScript syntax. Offline cache references were updated together to v3.1.
