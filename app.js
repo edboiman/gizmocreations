@@ -7,6 +7,7 @@ const HEX = /^#[\da-f]{6}$/i;
 let state = { cols: 32, rows: 32, name: 'My heart cardigan', bg: '#fff6f5', fg: '#cc4c76', ac: '#f2b84b', cells: [], row: 1 };
 let history = [], patterns = [], currentId = null, cellW = 16, cellH = 16, drawing = false, lastCell = '', lastImage = null;
 
+function newId() { return typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : 'id-' + Array.from(crypto.getRandomValues(new Uint32Array(4)), n => n.toString(16).padStart(8, '0')).join(''); }
 let timer;
 function notify(msg) { $('status').textContent = msg; clearTimeout(timer); timer = setTimeout(() => $('status').textContent = '', 5500); }
 function readStorage(k, f) { try { return JSON.parse(localStorage.getItem(k)) || f; } catch { return f; } }
@@ -110,12 +111,13 @@ function draw() {
   $('prevRow').disabled = state.row === 1; $('nextRow').disabled = state.row === state.rows; $('undo').disabled = !history.length;
   floatCheck();
 }
-function floatCheck() { // longest same-color run per row, for stranded knitting
+function floatCheck() { // Flag long runs only on rows that actually use multiple colors.
   const max = Number($('floatMax').value) || 7; let worst = 0, rowsOver = 0;
   for (let y = 0; y < state.rows; y++) {
-    const counts = {}; let run = 0, prev = -1, rowOver = false;
-    for (let x = 0; x < state.cols; x++) { const v = state.cells[y * state.cols + x]; run = v === prev ? run + 1 : 1; prev = v; counts[v] = 1; if (run > worst) worst = run; if (run > max && Object.keys(counts).length > 1) rowOver = true; }
-    if (rowOver) rowsOver++;
+    const counts = new Set(); let run = 0, prev = -1, longest = 0;
+    for (let x = 0; x < state.cols; x++) { const v = state.cells[y * state.cols + x]; run = v === prev ? run + 1 : 1; prev = v; counts.add(v); longest = Math.max(longest, run); }
+    worst = Math.max(worst, longest);
+    if (counts.size > 1 && longest > max) rowsOver++;
   }
   $('floatInfo').textContent = rowsOver ? `${rowsOver} row${rowsOver > 1 ? 's have' : ' has'} a color run over ${max} stitches — catch floats there.` : `No floats over ${max} stitches.`;
 }
@@ -282,12 +284,12 @@ $('png').onclick = () => $('chart').toBlob(b => { if (b) download(b, 'bow-and-pu
 $('print').onclick = () => window.print();
 
 // ---------- tabs & library ----------
-function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === id)); if (id === 'library') renderLibrary(); if (id === 'shop') if ($('shopResults')) renderShop(); }
+function tab(id) { for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => { b.classList.toggle('active', b.dataset.tab === id); if (b.dataset.tab === id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); if (id === 'library') renderLibrary(); if (id === 'shop') if ($('shopResults')) renderShop(); document.dispatchEvent(new CustomEvent('studio:tab', { detail: id })); }
 document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
 $('saveChart').onclick = () => { const p = patterns.find(p => p.id === currentId); $('saveWeight').value = p?.weight || weights[3]; $('saveNotes').value = p?.notes || ''; $('saveDialog').showModal(); };
 $('cancelSave').onclick = () => $('saveDialog').close();
 function persist(next) { if (writeStorage('bow-purl-patterns', next)) { patterns = next; return true; } return false; }
-$('saveForm').onsubmit = e => { e.preventDefault(); const id = currentId || crypto.randomUUID(); const item = { id, name: state.name || 'Untitled chart', weight: $('saveWeight').value, notes: $('saveNotes').value, link: '', chart: structuredClone(state) }; if (persist([...patterns.filter(p => p.id !== id), item])) { currentId = id; $('saveDialog').close(); notify('Pattern saved to your collection.'); } };
+$('saveForm').onsubmit = e => { e.preventDefault(); const id = currentId || newId(); const item = { id, name: state.name || 'Untitled chart', weight: $('saveWeight').value, notes: $('saveNotes').value, link: '', chart: structuredClone(state) }; if (persist([...patterns.filter(p => p.id !== id), item])) { currentId = id; $('saveDialog').close(); notify('Pattern saved to your collection.'); } };
 function changeRow(n) { state.row = Math.max(1, Math.min(state.rows, state.row + n)); draw(); draft(); if (currentId) { const next = structuredClone(patterns), p = next.find(p => p.id === currentId); if (p) { p.chart.row = state.row; persist(next); } } }
 $('prevRow').onclick = () => changeRow(-1); $('nextRow').onclick = () => changeRow(1); $('resetRow').onclick = () => changeRow(1 - state.row);
 function textNode(tag, text, parent) { const el = document.createElement(tag); el.textContent = text; parent.append(el); return el; }
@@ -298,7 +300,7 @@ function patternCard(p, parent) {
   const card = document.createElement('article'); card.className = 'panel card'; parent.append(card);
   if (p.chart) card.append(thumb(p.chart));
   else if (p.photo) { const im = document.createElement('img'); im.src = p.photo; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); card.append(im); }
-  const tag = textNode('span', p.source === 'ravelry' ? ({ library: 'In my Ravelry library', both: 'Favorite · in my library' }[p.ravFrom] || 'Ravelry favorite') : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
+  const tag = textNode('span', p.source === 'ravelry' ? ({ library: 'In my Ravelry library', both: 'Favorite · in my library' }[p.ravFrom] || 'Ravelry favorite') : p.source === 'seasonal' ? 'Monthly project idea' : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
   textNode('h2', p.name, card);
   if (p.designer) textNode('p', 'by ' + p.designer, card).className = 'muted';
   const y = yardText(p); if (y) textNode('p', '🧶 ' + y + (p.yardageNote ? ' · ' + p.yardageNote : ''), card).className = 'yards';
@@ -324,6 +326,7 @@ function parseYards(t) { const n = String(t).match(/\d[\d,]*/g)?.map(x => Number
 function renderLibrary() {
   const parent = $('patterns'), summary = $('weightSummary'); parent.replaceChildren(); summary.replaceChildren();
   const q = $('search').value.trim().toLowerCase(), src = $('sourceFilter').value;
+  $('summaryWrap').hidden = true;
   const shown = patterns.filter(p => ($('filter').value === 'all' || p.weight === $('filter').value) && (src === 'all' || (src === 'mine' ? p.source !== 'ravelry' : p.source === 'ravelry' && (src === 'ravelry' || p.ravFrom === src || p.ravFrom === 'both' || (!p.ravFrom && src === 'favorite')))) && (!q || (p.name + ' ' + (p.designer || '') + ' ' + p.notes).toLowerCase().includes(q)));
   if (!shown.length) { textNode('p', patterns.length ? 'No patterns match these filters.' : 'Your collection is waiting for its first pattern. Import your Ravelry favorites, save a chart, or add a pattern below.', parent); return; }
   const sort = $('sortBy').value;
@@ -350,20 +353,34 @@ function renderLibrary() {
   $('summaryWrap').hidden = !summary.children.length;
 }
 for (const id of ['filter', 'sourceFilter', 'sortBy']) $(id).onchange = renderLibrary; $('search').oninput = renderLibrary;
-$('addPattern').onsubmit = e => { e.preventDefault(); const link = $('patternLink').value.trim(); if (link && !/^https?:\/\//i.test(link)) { notify('Use an https:// or http:// pattern link.'); return; } const item = { id: crypto.randomUUID(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link, ...parseYards($('patternYards').value) }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } };
-$('backup').onclick = () => download(new Blob([JSON.stringify({ app: 'bow-and-purl', version: 2, patterns, motifs: myMotifs, stash: readStorage('bow-purl-stash', []), prices: readStorage('bow-purl-prices', null) }, null, 2)], { type: 'application/json' }), 'bow-and-purl-backup.json');
+$('addPattern').onsubmit = e => { e.preventDefault(); const link = $('patternLink').value.trim(); if (link && !/^https?:\/\//i.test(link)) { notify('Use an https:// or http:// pattern link.'); return; } const item = { id: newId(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link, ...parseYards($('patternYards').value) }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } };
+function makeBackup() { return { app: 'bow-and-purl', version: 3, patterns, motifs: myMotifs, stash, prices, yarns: myYarns, seasonPrefs: readStorage('bow-purl-season-prefs', {}) }; }
+$('backup').onclick = () => download(new Blob([JSON.stringify(makeBackup(), null, 2)], { type: 'application/json' }), 'bow-and-purl-backup.json');
 $('restore').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   try {
     if (f.size > 10 * 1024 * 1024) throw Error('Backup too large (maximum 10 MB).');
     const data = JSON.parse(await f.text());
-    if (data.app !== 'bow-and-purl' || ![1, 2].includes(data.version) || !Array.isArray(data.patterns) || data.patterns.length > 3000 || !data.patterns.every(validPattern)) throw Error('This is not a valid Bow & Purl backup.');
+    if (data.app !== 'bow-and-purl' || ![1, 2, 3].includes(data.version) || !Array.isArray(data.patterns) || data.patterns.length > 3000 || !data.patterns.every(validPattern)) throw Error('This is not a valid Bow & Purl backup.');
+    if (data.prices != null && !validPrices(data.prices)) throw Error('The price settings in this backup are invalid. Nothing was restored.');
+    if (data.stash !== undefined && (!Array.isArray(data.stash) || data.stash.length > 500 || !data.stash.every(validStash))) throw Error('The stash in this backup is invalid. Nothing was restored.');
     const ids = new Set(patterns.map(p => p.id)); const added = data.patterns.filter(p => { if (ids.has(p.id)) return false; ids.add(p.id); return true; });
     let m = 0; const motifs = data.motifs && typeof data.motifs === 'object' ? data.motifs : {};
     const nextM = { ...myMotifs }; for (const [k, r] of Object.entries(motifs)) if (k.length <= 60 && validMotif(r) && !nextM[k]) { nextM[k] = r; m++; }
-    if (Array.isArray(data.stash) && data.stash.length <= 500 && !readStorage('bow-purl-stash', []).length) { const ok = data.stash.filter(s => s && typeof s.brand === 'string' && s.brand.length <= 80 && weights.includes(s.weight) && s.yards > 0 && s.yards < 10000 && s.skeins > 0 && s.skeins < 1000).map(s => ({ id: crypto.randomUUID(), brand: s.brand, weight: s.weight, yards: +s.yards, skeins: +s.skeins, color: String(s.color || '').slice(0, 60) })); if (ok.length && writeStorage('bow-purl-stash', ok) && typeof stash !== 'undefined') stash = ok; }
+    if (Array.isArray(data.stash)) {
+      const nextStash = [...stash];
+      for (const record of data.stash) if (!nextStash.some(s => s.id === record.id || (record.ravId != null && s.ravId === record.ravId))) nextStash.push(structuredClone(record));
+      if (nextStash.length > 500) throw Error('Restoring would exceed 500 stash entries.');
+      if (writeStorage('bow-purl-stash', nextStash)) stash = nextStash;
+    }
     if (m && writeStorage('bow-purl-motifs', nextM)) { myMotifs = nextM; buildMotifMenu($('motif').value); }
-    if (persist([...patterns, ...added])) { renderLibrary(); notify(`Restored ${added.length} new patterns and ${m} motifs. Existing items were kept.`); }
+    let priceNote = '';
+    if (data.prices && !prices.custom.length && prices.source.startsWith('Built-in') && writeStorage('bow-purl-prices', data.prices)) { prices = structuredClone(data.prices); renderPrices(); priceNote = ' Price settings restored.'; }
+    else if (data.prices) priceNote = ' Existing price settings kept.';
+    if (Array.isArray(data.yarns)) { const nextYarns = [...myYarns]; for (const y of data.yarns.slice(0,300)) if (validYarn(y) && !nextYarns.some(n => n.name.toLowerCase() === y.name.toLowerCase())) nextYarns.push(y); if (writeStorage('bow-purl-yarns', nextYarns.slice(0,300))) myYarns = nextYarns.slice(0,300); }
+    if (data.seasonPrefs && ['north','south'].includes(data.seasonPrefs.hemisphere) && !readStorage('bow-purl-season-prefs', null) && writeStorage('bow-purl-season-prefs', { hemisphere: data.seasonPrefs.hemisphere })) $('ideaHemisphere').value = data.seasonPrefs.hemisphere;
+    fillBrandList();
+    if (persist([...patterns, ...added])) { renderLibrary(); notify(`Restored ${added.length} new patterns and ${m} motifs.${priceNote} Existing items were kept.`); }
   } catch (err) { notify(err.message); } finally { e.target.value = ''; }
 };
 
@@ -372,6 +389,18 @@ const RAV_WEIGHT = { thread: 0, cobweb: 0, lace: 0, 'light fingering': 1, finger
 function ravWeight(name) { const k = String(name).toLowerCase().replace(/\s*\(.*\)/, '').trim(); return k in RAV_WEIGHT ? weights[RAV_WEIGHT[k]] : 'Unspecified'; }
 const rav = readStorage('bow-purl-ravelry', {});
 $('ravUser').value = rav.user || ''; $('ravUrl').value = rav.url || ''; $('ravToken').value = rav.token || '';
+const saveRavSettings = () => writeStorage('bow-purl-ravelry', { user: $('ravUser').value.trim(), url: $('ravUrl').value.trim(), token: $('ravToken').value.trim() });
+for (const id of ['ravUser', 'ravUrl', 'ravToken']) $(id).addEventListener('input', saveRavSettings);
+// turn a failed request into a message that says what to fix
+function connectorError(err, res, data, what) {
+  if (err && err.name === 'AbortError') return `${what} took too long. Try again.`;
+  if (err && err instanceof TypeError) return `${what}: could not reach your connector. Check the Connector URL, and that ALLOWED_ORIGIN in Cloudflare exactly matches this site's address (https://name.github.io, no trailing slash).`;
+  if (res && data && data.error) return `${what}: ${data.error}`;
+  if (res && res.status === 401) return `${what}: the app token doesn't match APP_TOKEN in Cloudflare.`;
+  if (res && res.status === 403) return `${what}: the connector refused this site. ALLOWED_ORIGIN in Cloudflare must exactly match this site's address.`;
+  if (res && res.status === 500) return `${what}: the connector isn't configured. Set ALLOWED_ORIGIN and a 16+ character APP_TOKEN in Cloudflare.`;
+  return err ? `${what}: ${err.message}` : `${what} failed (${res ? res.status : 'no response'}).`;
+}
 $('ravSync').onclick = async () => {
   const user = $('ravUser').value.trim(), url = $('ravUrl').value.trim(), token = $('ravToken').value.trim();
   if (!user) { notify('Enter your Ravelry username.'); return; }
@@ -398,7 +427,7 @@ $('ravSync').onclick = async () => {
       } else { next.push({ id, notes: '', ...fields }); added++; }
     }
     if (persist(next)) { $('filter').value = 'all'; $('sourceFilter').value = 'all'; renderLibrary(); notify(`Ravelry: ${added} new and ${updated} updated patterns.` + (data.note ? ' ' + String(data.note).slice(0, 120) : '')); renderShop(); }
-  } catch (err) { notify(err.name === 'AbortError' ? 'Ravelry took too long. Try again.' : err.message); }
+  } catch (err) { notify(err instanceof TypeError || err.name === 'AbortError' ? connectorError(err, null, null, 'Import') : err.message); }
   finally { clearTimeout(t); btn.disabled = false; btn.textContent = '↻ Import from Ravelry'; }
 };
 

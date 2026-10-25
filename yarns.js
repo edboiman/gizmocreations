@@ -55,13 +55,44 @@ const DEFAULT_PRICES = {
 };
 const TIERS = ['Budget (acrylic)', 'Mid (wool / blends)', 'Premium (indie, merino)'];
 
+function validPrices(p) {
+  return !!p && Number.isInteger(p.tier) && p.tier >= 0 && p.tier <= 2 && typeof p.source === 'string' && p.source.length <= 200 && p.perYard && weights.every(w => Array.isArray(p.perYard[w]) && p.perYard[w].length === 3 && p.perYard[w].every(n => Number.isFinite(n) && n > 0 && n < 1000)) && Array.isArray(p.custom) && p.custom.length <= 500 && p.custom.every(c => c && typeof c.name === 'string' && c.name.length <= 80 && Number.isFinite(c.price) && c.price > 0 && c.price < 1000 && Number.isFinite(c.yards) && c.yards > 0 && c.yards < 10000 && weights.includes(c.weight));
+}
+const validYarn = y => y && typeof y.name === 'string' && y.name.length <= 80 && weights.includes(y.weight) && Number.isFinite(y.yards) && y.yards > 0 && y.yards < 10000;
 let prices = readStorage('bow-purl-prices', null);
-if (!prices || typeof prices.perYard !== 'object') prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: 1, source: 'Built-in 2026 US Midwest estimates' };
+if (!validPrices(prices)) prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: 1, source: 'Built-in 2026 US Midwest estimates' };
 let myYarns = readStorage('bow-purl-yarns', []);
 if (!Array.isArray(myYarns)) myYarns = [];
-myYarns = myYarns.filter(y => y && typeof y.name === 'string' && y.name.length <= 80 && weights.includes(y.weight) && y.yards > 0 && y.yards < 10000).slice(0, 300);
+myYarns = myYarns.filter(validYarn).slice(0, 300);
 let stash = readStorage('bow-purl-stash', []);
 if (!Array.isArray(stash)) stash = [];
+function validStash(s) {
+  const quantity = (v, max) => v == null || (Number.isFinite(v) && v >= 0 && v < max);
+  return !!s && typeof s.id === 'string' && s.id.length <= 100 && typeof s.brand === 'string' && s.brand.length <= 80 && weights.includes(s.weight) && quantity(s.yards, 10000) && quantity(s.skeins, 1000) && quantity(s.totalYards, 1000000) && (s.color === undefined || typeof s.color === 'string') && (s.ravId === undefined || Number.isInteger(s.ravId)) && (s.localQuantities === undefined || typeof s.localQuantities === 'boolean');
+}
+function stashTotal(s) {
+  if (s.skeins === 0) return 0;
+  if (s.yards > 0 && s.skeins != null) return s.yards * s.skeins;
+  return Number.isFinite(s.totalYards) ? s.totalYards : null;
+}
+function optionalQuantity(v, max) { if (v == null || String(v).trim() === '') return null; const n = Number(v); return Number.isFinite(n) && n >= 0 && n < max ? n : null; }
+stash = stash.filter(validStash).slice(0,500);
+function mergeRavelryStash(current, incoming) {
+  const next = structuredClone(current); let added = 0, updated = 0, skipped = 0, incomplete = 0;
+  for (const r of incoming.slice(0,500)) {
+    if (!Number.isInteger(r.id) || typeof r.name !== 'string' || !r.name.trim()) { skipped++; continue; }
+    const old = next.find(s => s.ravId === r.id);
+    const yards = optionalQuantity(r.yards,10000) || null, skeins = optionalQuantity(r.skeins,1000), totalYards = optionalQuantity(r.totalYards,1000000);
+    const item = { brand:r.name.slice(0,80), weight:ravW(r.weight), color:String(r.color || '').slice(0,60), ravId:r.id };
+    // Explicit local corrections take precedence; empty upstream fields never erase known amounts.
+    const amounts = old?.localQuantities ? { yards:old.yards, skeins:old.skeins, totalYards:old.totalYards ?? null } : { yards:yards ?? old?.yards ?? null, skeins:skeins ?? old?.skeins ?? null, totalYards:totalYards ?? old?.totalYards ?? null };
+    Object.assign(item, amounts);
+    if (item.yards == null || item.skeins == null) incomplete++;
+    if (old) { Object.assign(old,item); updated++; }
+    else { next.push({id:newId(), ...item}); added++; }
+  }
+  return {next,added,updated,skipped,incomplete};
+}
 const money = n => '$' + (n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(2));
 
 // ---------- helpers other screens use ----------
@@ -164,22 +195,15 @@ $('stashImport').onclick = async () => {
   const conf = readStorage('bow-purl-ravelry', {});
   if (!conf.user || !/^https:\/\//i.test(conf.url || '')) { notify('Set up Ravelry first: Pattern library → Ravelry username and Connector settings.'); return; }
   const btn = $('stashImport'); btn.disabled = true; btn.textContent = 'Importing…';
+  let res = null, data = null;
   try {
-    const res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'stash', username: conf.user }) });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw Error(data.error || `Stash import failed (${res.status}).`);
-    if (!Array.isArray(data.stash)) throw Error('Your Ravelry connector is out of date. Redeploy worker/ravelry-worker.js.');
-    const next = structuredClone(stash); let added = 0, updated = 0, skipped = 0;
-    for (const r of data.stash.slice(0, 500)) {
-      if (!Number.isInteger(r.id) || typeof r.name !== 'string' || !r.name.trim()) { skipped++; continue; }
-      let yards = Number(r.yards), skeins = Number(r.skeins);
-      if (!(skeins > 0) && Number(r.totalYards) > 0 && yards > 0) skeins = Math.round(Number(r.totalYards) / yards * 4) / 4;
-      if (!(yards > 0 && yards < 10000) || !(skeins > 0 && skeins < 1000)) { skipped++; continue; } // missing quantity on Ravelry
-      const item = { brand: r.name.slice(0, 80), weight: ravW(r.weight), yards: Math.round(yards), skeins: Math.round(skeins * 100) / 100, color: String(r.color || '').slice(0, 60), ravId: r.id };
-      const old = next.find(s => s.ravId === r.id);
-      if (old) { Object.assign(old, item); updated++; } else { next.push({ id: crypto.randomUUID(), ...item }); added++; }
-    }
-    if (saveStash(next)) { fillBrandList(); renderStash(); notify(`Ravelry stash: ${added} added, ${updated} updated${skipped ? `, ${skipped} skipped (no yardage or skein count on Ravelry)` : ''}${data.truncated ? '. Only the first 300 were read.' : '.'}`); }
+    try { res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'stash', username: conf.user }) }); data = await res.json().catch(() => ({})); }
+    catch (e) { throw Error(connectorError(e, null, null, 'Stash import')); }
+    if (!res.ok) throw Error(connectorError(null, res, data, 'Stash import'));
+    if (!Array.isArray(data.stash)) throw Error('Stash import: your Ravelry connector is out of date (it answered with patterns instead of a stash). Paste the newest worker/ravelry-worker.js into Cloudflare and click Deploy.');
+    if (!data.stash.length) throw Error('Ravelry returned an empty stash. If you have yarn on Ravelry, set your stash to public (Ravelry → Settings → Privacy), or add yarns by hand.');
+    const { next, added, updated, skipped, incomplete } = mergeRavelryStash(stash, data.stash);
+    if (saveStash(next)) { renderStash(); const message = `Ravelry stash: ${added} added, ${updated} updated. ${incomplete ? `${incomplete} entries need amount details; all were kept.` : 'Amount details are complete.'}${skipped ? ` ${skipped} invalid records skipped.` : ''}${data.truncated ? ' Only the first 300 were read.' : ''}${data.failedDetails ? ` ${data.failedDetails} details could not be read; try importing again.` : ''}`; $('stashImportResult').textContent = message; notify(message); }
   } catch (err) { notify(err.message); } finally { btn.disabled = false; btn.textContent = '↻ Import stash from Ravelry'; }
 };
 
@@ -209,15 +233,33 @@ $('yarnSearch').onclick = async () => {
 };
 
 // ---------- stash ----------
-function saveStash(next) { if (writeStorage('bow-purl-stash', next)) { stash = next; fillBrandList(); return true; } return false; }
+function saveStash(next) { if (next.length > 500) { notify('This device can hold 500 stash entries. Export a backup before making room for more.'); return false; } if (writeStorage('bow-purl-stash', next)) { stash = next; fillBrandList(); return true; } return false; }
 $('stashForm').onsubmit = e => {
   e.preventDefault();
-  const brand = $('stashBrand').value.trim().slice(0, 80), yards = Number($('stashYards').value), skeins = Number($('stashSkeins').value);
+  const brand = $('stashBrand').value.trim().slice(0, 80), yards = optionalQuantity($('stashYards').value,10000), skeins = optionalQuantity($('stashSkeins').value,1000);
   if (!brand) { notify('Enter the yarn brand and name.'); return; }
-  if (!(yards > 0 && yards < 10000) || !(skeins > 0 && skeins < 1000)) { notify('Enter yards per skein and how many skeins you have.'); return; }
-  const item = { id: crypto.randomUUID(), brand, weight: $('stashWeight').value, yards, skeins, color: $('stashColor').value.trim().slice(0, 60) };
+  const item = { id: newId(), brand, weight: $('stashWeight').value, yards, skeins, color: $('stashColor').value.trim().slice(0, 60) };
   if (saveStash([...stash, item])) { $('stashForm').reset(); $('stashWeight').value = item.weight; renderStash(); notify('Added to your stash.'); }
 };
+let editingStashId = null;
+function editStashAmounts(s) {
+  editingStashId = s.id; $('stashEditTitle').textContent = s.brand;
+  $('editStashYards').value = s.yards ?? ''; $('editStashSkeins').value = s.skeins ?? ''; $('editStashTotal').value = s.totalYards ?? '';
+  $('stashEditDialog').showModal();
+}
+$('cancelStashEdit').onclick = () => $('stashEditDialog').close();
+$('stashEditForm').onsubmit = e => {
+  e.preventDefault(); const next = structuredClone(stash), item = next.find(s => s.id === editingStashId); if (!item) return;
+  const yards = optionalQuantity($('editStashYards').value,10000), skeins = optionalQuantity($('editStashSkeins').value,1000), total = optionalQuantity($('editStashTotal').value,1000000);
+  Object.assign(item, {yards,skeins,totalYards:yards > 0 && skeins != null ? null : total,localQuantities:true});
+  if (saveStash(next)) { $('stashEditDialog').close(); renderStash(); notify('Amounts saved on this device. Re-importing keeps your corrections.'); }
+};
+function adjustStash(s, amount) {
+  if (s.skeins == null) return;
+  const next = structuredClone(stash), item = next.find(n => n.id === s.id);
+  item.skeins = Math.max(0, +(item.skeins + amount).toFixed(2)); item.totalYards = null; item.localQuantities = true;
+  if (saveStash(next)) renderStash();
+}
 function renderStash() {
   const list = $('stashList'), out = $('stashMatches'); list.replaceChildren(); out.replaceChildren();
   if (!stash.length) { textNode('p', 'Your stash is empty. Add a yarn above to see what you can make.', list); return; }
@@ -225,16 +267,25 @@ function renderStash() {
     const row = document.createElement('div'); row.className = 'stash-item'; list.append(row);
     const b = document.createElement('div'); row.append(b);
     textNode('b', s.brand + (s.color ? ' · ' + s.color : '') + (s.ravId ? ' ↻' : ''), b);
-    textNode('span', `${s.weight.replace(/^\d • /, '')} · ${s.skeins} × ${s.yards} yds = ${fmt(s.skeins * s.yards)} yds`, b).className = 'muted';
+    const total = stashTotal(s);
+    textNode('span', `${s.weight.replace(/^\d • /, '')} · ${s.skeins == null ? 'Skeins unknown' : s.skeins + ' skeins'} · ${s.yards == null ? 'Yards per skein unknown' : s.yards + ' yds/skein'}${total == null ? ' · Total unknown' : ' · ' + fmt(total) + ' yds total'}`, b).className = 'muted';
+    if (s.yards == null || s.skeins == null) textNode('span', 'Kept in your stash — add amounts whenever you know them.', b).className = 'hint';
+    if (s.localQuantities && s.ravId) textNode('span', 'Your local amounts are kept on re-import.', b).className = 'hint';
     const act = document.createElement('div'); act.className = 'actions'; row.append(act);
-    textNode('button', '−', act).onclick = () => { const next = structuredClone(stash), n = next.find(x => x.id === s.id); n.skeins = Math.max(0, +(n.skeins - 1).toFixed(2)); saveStash(next.filter(x => x.skeins > 0)); renderStash(); };
-    textNode('button', '+', act).onclick = () => { const next = structuredClone(stash); next.find(x => x.id === s.id).skeins++; saveStash(next); renderStash(); };
+    textNode('button', 'Edit amounts', act).onclick = () => editStashAmounts(s);
+    const minus = textNode('button', '−', act), plus = textNode('button', '+', act);
+    minus.setAttribute('aria-label', 'Use one skein of ' + s.brand); plus.setAttribute('aria-label', 'Add one skein of ' + s.brand);
+    minus.disabled = s.skeins == null || s.skeins <= 0; plus.disabled = s.skeins == null;
+    minus.onclick = () => adjustStash(s,-1); plus.onclick = () => adjustStash(s,1);
     textNode('button', 'Remove', act).onclick = () => { if (confirm(`Remove ${s.brand} from your stash?`)) { saveStash(stash.filter(x => x.id !== s.id)); renderStash(); } };
   }
   // suggestions: one yarn on its own, or all yarns of a weight combined (colorwork, stripes)
   const combine = $('stashCombine').checked;
-  const groups = combine ? weights.map(w => ({ label: `All your ${w.replace(/^\d • /, '')}`, weight: w, total: stash.filter(s => s.weight === w).reduce((t, s) => t + s.yards * s.skeins, 0) })).filter(g => g.total)
-    : stash.map(s => ({ label: s.brand + (s.color ? ' · ' + s.color : ''), weight: s.weight, total: s.yards * s.skeins, per: s.yards }));
+  const known = stash.filter(s => stashTotal(s) != null);
+  const unknown = stash.length - known.length;
+  if (unknown) textNode('p', `${unknown} yarn entries have unknown total yardage. They stay in your stash; add amounts to include them in project estimates.`, out).className = 'hint';
+  const groups = combine ? weights.map(w => ({ label: `Known amounts of your ${w.replace(/^\d • /, '')}`, weight: w, total: known.filter(s => s.weight === w).reduce((t,s) => t + stashTotal(s),0) })).filter(g => g.total > 0)
+    : known.map(s => ({ label:s.brand + (s.color ? ' · ' + s.color : ''), weight:s.weight, total:stashTotal(s), per:s.yards }));
   let any = false;
   for (const g of groups) {
     const fits = patterns.filter(p => p.weight === g.weight && (p.yardsMin ?? p.yardsMax) != null && (p.yardsMin ?? p.yardsMax) <= g.total)

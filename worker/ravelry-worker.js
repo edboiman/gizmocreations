@@ -15,6 +15,20 @@ const API = 'https://api.ravelry.com';
 // Constant-time comparison so the token can't be guessed by timing responses.
 function sameToken(a, b) { a = String(a); b = String(b); let d = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return d === 0; }
 
+// Unknown quantities stay null. Partial pack totals must not look complete.
+function stashAmounts(st) {
+  const packs = Array.isArray(st.packs) ? st.packs : [];
+  const number = v => v == null || String(v).trim() === '' || !Number.isFinite(Number(v)) || Number(v) < 0 ? null : Number(v);
+  const catalog = number(st.yarn?.yardage);
+  const rows = packs.map(p => ({ skeins:number(p.skeins), yards:number(p.yards_per_skein) || catalog || null, total:number(p.total_yards) }));
+  const sumKnown = values => values.length && values.every(v => v != null) ? values.reduce((a,b) => a+b,0) : null;
+  const skeins = sumKnown(rows.map(p => p.skeins));
+  const totalYards = sumKnown(rows.map(p => p.total ?? (p.skeins != null && p.yards != null ? p.skeins*p.yards : null)));
+  const per = rows.map(p => p.yards ?? (p.skeins > 0 && p.total != null ? p.total / p.skeins : null));
+  const yards = !rows.length ? catalog : per.every(v => v > 0 && v === per[0]) ? per[0] : null;
+  return { yards, skeins, totalYards };
+}
+
 export default {
   async fetch(req, env) {
     const cors = {
@@ -59,32 +73,32 @@ export default {
         const ids = [];
         for (let page = 1; page <= 5; page++) {
           const r = await fetch(`${API}/people/${u}/stash/list.json?page_size=100&page=${page}`, H);
-          if (r.status === 404 || r.status === 403) return reply({ error: 'Ravelry stash not found or private.' }, 404);
+          if (r.status === 401) return reply({ error: 'Ravelry rejected the connector credentials (RAVELRY_USER / RAVELRY_PASS).' }, 502);
+          if (r.status === 403) return reply({ error: 'Ravelry says this stash is private. The connector can only read what you have made public: Ravelry → Settings → Privacy, set Stash to visible, then try again.' }, 404);
+          if (r.status === 404) return reply({ error: 'Ravelry could not find that username, or its stash is private. Check the spelling in Pattern library, and your stash privacy setting.' }, 404);
           if (!r.ok) return reply({ error: `Ravelry stash error (${r.status}).` }, 502);
           const j = await r.json();
           for (const st of j.stash || []) if (Number.isInteger(st.id)) ids.push(st.id);
           if (!j.paginator || page >= j.paginator.last_page) break;
         }
-        const out = [];
+        const out = []; let failedDetails = 0;
         for (let i = 0; i < Math.min(ids.length, 300); i += 10) { // details in small parallel batches
           const batch = await Promise.all(ids.slice(i, i + 10).map(id => fetch(`${API}/people/${u}/stash/${id}.json`, H).then(r => r.ok ? r.json() : null).catch(() => null)));
           for (const j of batch) {
-            const st = j?.stash; if (!st) continue;
+            const st = j?.stash; if (!st) { failedDetails++; continue; }
             const y = st.yarn || {}, pk = (st.packs || [])[0] || {};
-            if (st.status_name && /used up|gifted|traded|sold/i.test(st.status_name)) continue;
-            const skeins = (st.packs || []).reduce((t, k) => t + (Number(k.skeins) || 0), 0);
+            const stat = st.stash_status?.name || st.status_name || ''; if (/used up|gifted|traded|sold/i.test(stat)) continue;
+            const amounts = stashAmounts(st);
             out.push({
               id: st.id,
               name: `${y.yarn_company_name || st.yarn_company_name || ''} ${y.name || st.name || ''}`.trim().slice(0, 80),
               weight: y.yarn_weight?.name || pk.yarn_weight?.name || '',
-              yards: Number(pk.yards_per_skein) || Number(y.yardage) || (skeins && Number(pk.total_yards) ? Number(pk.total_yards) / skeins : null),
-              skeins: skeins || null,
-              totalYards: (st.packs || []).reduce((t, k) => t + (Number(k.total_yards) || 0), 0) || null,
+              ...amounts,
               color: String(st.colorway_name || pk.colorway || '').slice(0, 60)
             });
           }
         }
-        return reply({ stash: out, truncated: ids.length > 300 });
+        return reply({ stash: out, truncated: ids.length > 300, failedDetails });
       } catch { return reply({ error: 'Could not reach Ravelry.' }, 502); }
     }
 
