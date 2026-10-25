@@ -1,35 +1,45 @@
-# Bow & Purl
-A phone-friendly, Hello Kitty inspired knitting studio. Static HTML, CSS and JavaScript: no build, subscription, account or API key required.
+# Bow & Purl v2
+A phone-friendly knitting colorwork studio. Static HTML, CSS and JavaScript — no build step. Runs on GitHub Pages.
 
-## Put it on GitHub Pages
-1. Unzip this download.
-2. Create a GitHub repository (a public repository is the simplest Pages option).
-3. Choose **Add file → Upload files**. Upload the FOUR FILES INSIDE this folder: `index.html`, `style.css`, `app.js`, and `README.md`. Put them at the repository root; do not upload the ZIP or the enclosing folder.
-4. Commit the files.
-5. In repository **Settings → Pages**, select **Deploy from a branch**, then **main** and **/ (root)**. Save.
-6. Open the Pages URL GitHub displays once deployment finishes. On a phone, open that URL in your browser. Add to Home Screen if your browser offers it.
+## Upload to GitHub Pages
+Upload everything in this folder to the repository root, keeping the folders:
+```
+index.html  style.css  app.js  motifs.js  llm.js  README.md
+images/     (your kitten photos — see below)
+worker/claude-worker.js   (optional AI connector; deployed separately, harmless if uploaded)
+```
+Then Settings → Pages → Deploy from a branch → main → / (root).
 
-No hidden files are needed. There are only four files to upload. If your default branch has a different name, select that branch instead of main.
+## What's new in v2
+- **55-design dropdown**: 23 cute & cozy motifs, 25 original game/fantasy pixel designs (swords, shields, potions, dragon, slime, wizard hat, runes, dice…), 7 all-over patterns (argyle, peerie, zigzag, dots…). Plus "Surprise me".
+- **Three colors** (background, motif, accent) with preset palettes and a "two colors only" switch.
+- **Knit controls**: grid, half-drop, brick, single band (yokes/hems) or centred layout; scale 1–4× or auto; gap across/down; mirror, flip, swap colors, peerie border.
+- **Editor**: accent paint, 2×2 / 3×3 brush, 10-stitch guide lines, current-row highlight, mirror/swap/clear, and a **float checker** that flags color runs longer than 5/7/9 stitches.
+- **Better image conversion**: live darkness and contrast sliders, 2 or 3 colors, optional dithering, lone-stitch cleanup, fit/fill/stretch, and knit-proportion correction.
+- **Type your own grid**: paste rows of 0/1/2 (or . # @); "Copy chart into box" exports the current chart as text.
+- **My motifs**: tap "♡ Save as my motif" to crop the current chart and add it to the top of the motif dropdown. Build designs by typing a grid, uploading an image or painting. Saved per device and included in backups.
+- **Library thumbnails**. Old v1 charts and backups still load.
 
-## Included
-- Set 8–120 stitch columns and 8–160 rows.
-- Prompt matching for hearts, stars, flowers, bows, cats / Hello Kitty, diamonds, checks and stripes.
-- Centered or repeated motifs, two editable yarn colors, touch painting, undo, knitted aspect preview.
-- Upload PNG/JPEG/WebP artwork and convert it to a two-color silhouette.
-- Numbered PNG download and browser Print / Save as PDF (large charts shrink to fit).
-- Save charts and external pattern links by standard yarn weight, with notes.
-- Track current row; export and merge JSON backups.
-- Browser-local data; no images or patterns are sent to a server.
+## Kitten photos
+The studio, library and help tabs each show a kitten banner. Add your own photos to `images/`:
+`kitten-studio.jpg`, `kitten-library.jpg`, `kitten-help.jpg` (landscape, ~1200×400 works well).
+Use photos you took or that are licensed for reuse (e.g. Unsplash or Pexels — check each photo's licence). Any banner without a file simply hides itself.
 
-## Customer requirement that needs a second phase
-The prompt field is a transparent built-in motif selector. It does NOT invent arbitrary artwork using AI. For example, “pink hearts” selects a heart motif; color comes from the color pickers. “A fox drinking tea on the moon” needs uploaded artwork or a future AI integration. Unsupported requests show a message instead of silently generating an unrelated chart.
+## Optional AI design (Claude or ChatGPT)
+`llm.js` sends a prompt to a small connector that you host; the connector holds the API key. **Never put an API key in the GitHub files** — anyone could read it.
 
-For unrestricted AI prompts, keep GitHub Pages as the frontend and add an authenticated backend or serverless function that holds the provider key, limits requests and returns chart data. Never put a secret API key in these files. Budget for model usage and manually review generated charts for stranded-knitting suitability.
+1. Create a free Cloudflare account → Workers → Create Worker → paste `worker/claude-worker.js` → Deploy.
+2. In the Worker's Settings → Variables add:
+   - `ANTHROPIC_API_KEY` (as a secret) — from console.anthropic.com. **Or** for ChatGPT: `PROVIDER=openai`, `OPENAI_API_KEY` (secret) and `MODEL` (an OpenAI model name).
+   - `ALLOWED_ORIGIN` = your Pages address, e.g. `https://yourname.github.io`
+   - `APP_TOKEN` = any random phrase (optional but recommended).
+3. Add a rate-limiting rule for the Worker and set a monthly spending limit with your AI provider.
+4. In the app: Chart studio → Design with AI → AI settings. Paste the Worker URL and app token, then Save.
 
-## Practical limits
-Saved patterns belong to the specific browser and site address. They do not sync between devices. Export backups regularly. Clearing browser data, switching domains or using private browsing can remove saved work. No PDF attachments, accounts, automatic stitch instructions, shaping, float warnings or offline guarantee are included.
+The connector asks for original designs and validates the returned grid before the app accepts it. AI output still needs a human check for knittability.
 
-This is an independent fan-style project, not an official Sanrio product. The cat illustration is built with CSS; there are no downloaded character assets.
+## Design notes
+All motifs and the mascot (Mochi, a calico cat) are original artwork. The app does not include licensed characters, game logos or emblems; the AI connector is instructed to make original designs in the same spirit if asked for one.
 
-## Verification
-JavaScript syntax and automated logic checks cover dimensions, motif generation, row limits and backup validation. Phone browser interaction and printed layout still need a real-device check before customer release.
+## Limits
+Patterns are stored in the browser on one device; export backups. No accounts or sync. The float check is a guide, not a full stranded-knitting review. Test on a real phone and print once before sharing with customers.

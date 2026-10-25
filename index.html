@@ -1,1 +1,133 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ba3d65"><title>Bow & Purl • Knitting studio</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script><body><header><span class="cat" aria-hidden="true">🎀</span><div><b>Bow & Purl</b><small>Your little knitting studio</small></div><span class="badge">Made stitch by stitch</span></header><main><section class="hero"><div><span class="eyebrow">A LITTLE YARN. A LITTLE MAGIC.</span><h1>Dream it.<br>Knit it.</h1><p>A cozy place for colorwork ideas and patterns worth keeping.</p></div><div class="kitty" aria-hidden="true"><div class="ear left"></div><div class="ear right"></div><div class="face"><span class="bow">🎀</span><span class="eyes">● &nbsp; ●</span><span class="nose">●</span><span class="whiskers">─ &nbsp; &nbsp; ─</span></div><div class="ball">🧶</div></div></section><nav aria-label="Studio sections"><button data-tab="studio" class="active">✦ Chart studio</button><button data-tab="library">♡ Pattern library</button><button data-tab="help">Getting started</button></nav><section id="studio"><div class="section-title"><div><span class="eyebrow">MAKE SOMETHING SWEET</span><h2>Your next colorwork chart</h2></div><span class="pill">One square = one stitch</span></div><div class="workspace"><form id="generator" class="panel"><h3>Start with an idea</h3><label>Chart name<input id="chartName" maxlength="100" value="My heart cardigan"></label><div class="pair"><label>Columns / stitches<input id="cols" type="number" min="8" max="120" value="32" required></label><label>Rows<input id="rows" type="number" min="8" max="160" value="32" required></label></div><label>What would you like?<textarea id="prompt" rows="3" placeholder="Pink hearts, a cat with a red bow, flowers…">Repeating pink hearts</textarea></label><p class="hint">Motif generator: hearts, cats / Hello Kitty, bows, flowers, stars, diamonds, checks and stripes. This version uses built-in motifs, not generative AI.</p><label>Layout<select id="layout"><option value="repeat">Repeating motif</option><option value="single">One centered motif</option></select></label><div class="pair"><label>Background<input id="background" type="color" value="#fff6f5"></label><label>Motif<input id="foreground" type="color" value="#cc4c76"></label></div><button class="primary" type="submit">✦ Generate chart</button><div class="divider">or use your own artwork</div><label class="upload">Choose an image<input id="image" type="file" accept="image/png,image/jpeg,image/webp"></label><p class="hint">Converts an image to your two yarn colors. Use a simple, high contrast design.</p></form><div class="panel editor"><div class="editor-top"><div><h3 id="chartTitle">My heart cardigan</h3><p id="dimensions"></p></div><button id="undo" type="button">↶ Undo</button></div><div class="toolbar"><label>Paint with<select id="paint"><option value="1">Motif color</option><option value="0">Background / erase</option></select></label><label class="check"><input id="knitShape" type="checkbox"> Knit proportions</label></div><div class="chart-scroll"><canvas id="chart" tabindex="0" aria-label="Editable knitting chart; tap a square to change its color"></canvas></div><p class="hint">Tap or drag to paint. Row 1 is at the bottom. Flat knitting: odd rows right to left, even rows left to right. In the round: all rows right to left.</p><div class="actions"><button id="saveChart" class="primary">♡ Save pattern</button><button id="png">Download PNG</button><button id="print">Print / PDF</button></div><div class="progress"><b>Keep your place</b><div class="actions"><button id="prevRow" aria-label="Previous row">−</button><span id="rowCount"></span><button id="nextRow" aria-label="Next row">+</button><button id="resetRow">Reset</button></div></div></div></div></section><section id="library" hidden><div class="section-title"><div><span class="eyebrow">A HOME FOR YOUR IDEAS</span><h2>Pattern library</h2></div></div><div class="panel"><div class="actions"><label>Filter by yarn weight<select id="filter"></select></label><button id="backup">Export backup</button><label class="upload">Restore backup<input id="restore" type="file" accept="application/json,.json"></label></div><p class="hint">Saved on this browser and device. Export a backup to move your patterns to another phone or protect them before clearing browser data.</p></div><div id="patterns" class="cards"></div><details class="panel"><summary>Add a pattern from elsewhere</summary><form id="addPattern"><label>Pattern name<input id="patternName" maxlength="100" required></label><label>Yarn weight<select id="patternWeight"></select></label><label>Pattern link (optional)<input id="patternLink" type="url" placeholder="https://…"></label><label>Notes<textarea id="patternNotes" maxlength="10000" placeholder="Needles, yarn, gauge, where you stored the PDF…"></textarea></label><button class="primary">Save pattern</button></form></details></section><section id="help" class="panel" hidden><h2>A happy little start</h2><ol><li>Set your stitch and row counts, choose colors and describe a supported motif.</li><li>Generate a chart, then tap squares to adjust it. Upload artwork for a custom silhouette.</li><li>Save your chart under a yarn weight. Add notes and track your current row.</li><li>Download a numbered PNG or use Print / PDF. Back up your library regularly.</li></ol><h3>Before you cast on</h3><p>Swatch first: stitch shape and gauge change the finished picture. Knit proportions is a preview, not a gauge calculation. This is a color chart, not a complete knitting pattern. Long color runs may need float management; check tension and construction yourself.</p><h3>Phone & privacy</h3><p>Open your GitHub Pages address in your phone browser and use Add to Home Screen if available. Images and patterns stay in your browser. There is no account, cloud sync, or AI service.</p><p class="hint">An independent fan-style knitting project inspired by Hello Kitty. Not affiliated with Sanrio.</p></section><footer>Made for slow mornings & beautiful stitches. 🎀</footer></main><dialog id="saveDialog"><form id="saveForm"><h2>Save to your collection</h2><label>Yarn weight<select id="saveWeight"></select></label><label>Notes<textarea id="saveNotes" maxlength="10000" placeholder="Yarn, needle size, gauge…"></textarea></label><div class="actions"><button type="button" id="cancelSave">Cancel</button><button class="primary">Save pattern</button></div></form></dialog><p id="status" role="status" aria-live="polite"></p></body></html>
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ba3d65">
+<title>Bow & Purl • Knitting studio</title>
+<link rel="stylesheet" href="style.css">
+<script src="motifs.js" defer></script>
+<script src="llm.js" defer></script>
+<script src="app.js" defer></script>
+<body>
+<header><span class="logo" aria-hidden="true">🧶</span><div><b>Bow & Purl</b><small>Your little knitting studio</small></div><span class="badge">Made stitch by stitch</span></header>
+<main>
+<section class="hero">
+  <div><span class="eyebrow">A LITTLE YARN. A LITTLE MAGIC.</span><h1>Dream it.<br>Knit it.</h1><p>A cozy place for colorwork ideas and patterns worth keeping. Meet Mochi, our studio cat.</p></div>
+  <!-- Mochi: an original calico mascot drawn in SVG -->
+  <svg class="mascot" viewBox="0 0 240 220" role="img" aria-label="Mochi, a calico cat in a knitted scarf, holding a ball of yarn">
+    <ellipse cx="120" cy="205" rx="85" ry="10" fill="#e4acbd" opacity=".55"/>
+    <path d="M60 190c-6-40 8-72 60-72s66 32 60 72z" fill="#fffaf2" stroke="#694552" stroke-width="3"/>
+    <path d="M160 140c18 4 30 20 26 42" fill="none" stroke="#694552" stroke-width="3"/>
+    <path d="M178 150c22-6 40 10 34 30" fill="none" stroke="#d98b4e" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 70 62 18l38 34M190 70 178 18l-38 34" fill="#fffaf2" stroke="#694552" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M64 30l6 22 18-4zM176 30l-6 22-18-4z" fill="#f4b8c6"/>
+    <ellipse cx="120" cy="88" rx="76" ry="58" fill="#fffaf2" stroke="#694552" stroke-width="3"/>
+    <path d="M60 60c10-22 34-28 48-24-6 18-24 30-50 34z" fill="#d98b4e"/>
+    <path d="M150 38c18 2 30 14 34 30-14 2-30-6-38-22z" fill="#3f2a33"/>
+    <ellipse cx="94" cy="92" rx="7" ry="10" fill="#3f2a33"/><ellipse cx="146" cy="92" rx="7" ry="10" fill="#3f2a33"/>
+    <circle cx="96" cy="88" r="2.5" fill="#fff"/><circle cx="148" cy="88" r="2.5" fill="#fff"/>
+    <path d="M116 106l4 4 4-4z" fill="#e0708f"/>
+    <path d="M120 110c-3 6-10 6-12 2M120 110c3 6 10 6 12 2" fill="none" stroke="#694552" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="78" cy="110" rx="9" ry="5" fill="#f6b5c4" opacity=".7"/><ellipse cx="162" cy="110" rx="9" ry="5" fill="#f6b5c4" opacity=".7"/>
+    <path d="M40 100h26M42 112h24M174 100h26M174 112h24" stroke="#694552" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 136c30 14 82 14 112 0l2 16c-32 14-84 14-116 0z" fill="#b63862"/>
+    <path d="M74 142v10M90 146v10M106 148v10M122 148v10M138 147v10M154 145v10M168 141v10" stroke="#fff" stroke-width="2" opacity=".55"/>
+    <path d="M150 150l10 34h-18z" fill="#b63862"/><path d="M144 184h18M146 190h14" stroke="#b63862" stroke-width="3"/>
+    <circle cx="82" cy="182" r="20" fill="#9978ba" stroke="#694552" stroke-width="3"/>
+    <path d="M66 172c10 4 24 16 30 26M64 186c12 0 24 6 30 14M74 164c8 8 14 22 14 36" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>
+    <ellipse cx="100" cy="186" rx="12" ry="9" fill="#fffaf2" stroke="#694552" stroke-width="3"/>
+  </svg>
+</section>
+<nav aria-label="Studio sections"><button data-tab="studio" class="active">✦ Chart studio</button><button data-tab="library">♡ Pattern library</button><button data-tab="help">Getting started</button></nav>
+
+<section id="studio">
+  <figure class="kitten-banner"><img class="kitten" src="images/kitten-studio.jpg" alt="A kitten playing with yarn"><figcaption>Studio supervisor on duty</figcaption></figure>
+  <div class="section-title"><div><span class="eyebrow">MAKE SOMETHING SWEET</span><h2>Your next colorwork chart</h2></div><span class="pill">One square = one stitch</span></div>
+  <div class="workspace">
+    <form id="generator" class="panel">
+      <h3>Start with an idea</h3>
+      <label>Chart name<input id="chartName" maxlength="100" value="My heart cardigan"></label>
+      <div class="pair"><label>Columns / stitches<input id="cols" type="number" min="8" max="120" value="32" required></label><label>Rows<input id="rows" type="number" min="8" max="160" value="32" required></label></div>
+      <label>Motif <span class="hint inline" id="motifCount"></span><select id="motif"></select></label>
+      <div class="actions"><button class="primary" type="submit">✦ Generate chart</button><button type="button" id="surprise">🎲 Surprise me</button><button type="button" id="deleteMotif" hidden>Delete my motif</button></div>
+
+      <details class="sub" open><summary>Knit controls</summary>
+        <label>Layout<select id="layout"><option value="repeat">Repeating grid</option><option value="halfdrop">Half-drop repeat</option><option value="brick">Brick repeat</option><option value="band">Single band (yoke / hem)</option><option value="single">One centered motif</option></select></label>
+        <div class="pair three"><label>Scale<select id="scale"><option value="0">Auto</option><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></label><label>Gap across<input id="gapX" type="number" min="0" max="20" value="3"></label><label>Gap down<input id="gapY" type="number" min="0" max="20" value="3"></label></div>
+        <div class="checks"><label class="check"><input id="mirror" type="checkbox"> Mirror</label><label class="check"><input id="flip" type="checkbox"> Flip</label><label class="check"><input id="invert" type="checkbox"> Swap colors</label><label class="check"><input id="noAccent" type="checkbox"> Two colors only</label><label class="check"><input id="border" type="checkbox"> Peerie border</label></div>
+        <p class="hint">Scale also sets the stripe/check size for all-over patterns.</p>
+      </details>
+
+      <details class="sub" open><summary>Yarn colors</summary>
+        <label>Palette<select id="palette"><option value="">Custom</option><option value="#fff6f5,#cc4c76,#f2b84b">Strawberry milk</option><option value="#f4efe6,#2f4858,#c8553d">Nordic winter</option><option value="#1d1b2f,#7fd1ae,#f6c453">Dungeon glow</option><option value="#efe9f7,#6b4c9a,#e98ab0">Lavender spell</option><option value="#f7f1e3,#3d6b45,#c9302c">Forest & berry</option><option value="#202124,#e8e3d9,#b8a26a">Moonlit</option></select></label>
+        <div class="pair three"><label>Background<input id="background" type="color" value="#fff6f5"></label><label>Motif<input id="foreground" type="color" value="#cc4c76"></label><label>Accent<input id="accent" type="color" value="#f2b84b"></label></div>
+      </details>
+
+      <div class="divider">or use your own artwork</div>
+      <label class="upload">Choose an image<input id="image" type="file" accept="image/png,image/jpeg,image/webp"></label>
+      <div id="imageTools" hidden>
+        <label>Darkness cut-off <span class="hint inline" id="thresholdVal">140</span><input id="threshold" type="range" min="20" max="235" value="140"></label>
+        <label>Contrast <span class="hint inline" id="contrastVal">120%</span><input id="contrast" type="range" min="50" max="250" value="120"></label>
+        <div class="pair"><label>Colors<select id="imgColors"><option value="2">2 colors</option><option value="3">3 colors</option></select></label><label>Fit<select id="fit"><option value="contain">Fit whole image</option><option value="fill">Fill & crop</option><option value="stretch">Stretch</option></select></label></div>
+        <div class="checks"><label class="check"><input id="dither" type="checkbox"> Shading (dither)</label><label class="check"><input id="cleanup" type="checkbox" checked> Remove lone stitches</label><label class="check"><input id="imgInvert" type="checkbox"> Invert</label></div>
+      </div>
+      <p class="hint">Simple, high-contrast artwork works best. Turn on Knit proportions first so the picture isn't squashed when knitted.</p>
+
+      <details class="sub" id="gridDetails"><summary>Type your own grid</summary>
+        <p class="hint">One line per row, top row first. 0 or . = background, 1 or # = motif, 2 or @ = accent. Uses the layout and scale above.</p>
+        <textarea id="gridText" rows="7" spellcheck="false" class="mono" placeholder="0011100&#10;0111110&#10;1121211&#10;1111111"></textarea>
+        <div class="actions"><button type="button" id="applyGrid">Place grid</button><button type="button" id="exportGrid">Copy chart into box</button></div><p class="hint">Made something you love? Save it as a motif and it joins the dropdown under ♡ My motifs. My motifs stay on this device and are included in library backups.</p>
+      </details>
+
+      <details class="sub"><summary>✦ Design with AI (optional)</summary>
+        <p class="hint">Describe anything — "a fox drinking tea on the moon". Needs your own connector (see README). Your API key lives on the connector, never in this page.</p>
+        <textarea id="aiPrompt" rows="2" maxlength="400" placeholder="A sleepy owl on a branch"></textarea>
+        <button type="button" class="primary" id="aiGo">✦ Design with AI</button>
+        <details class="sub"><summary>AI settings</summary>
+          <label>Connector URL<input id="aiEndpoint" type="url" placeholder="https://bow-purl-ai.yourname.workers.dev"></label>
+          <label>App token (optional)<input id="aiToken" autocomplete="off"></label>
+          <button type="button" id="saveAi">Save settings</button>
+        </details>
+      </details>
+    </form>
+
+    <div class="panel editor">
+      <div class="editor-top"><div><h3 id="chartTitle">My heart cardigan</h3><p id="dimensions"></p></div><button id="undo" type="button">↶ Undo</button></div>
+      <div class="toolbar">
+        <label>Paint with<select id="paint"><option value="1">Motif color</option><option value="2">Accent color</option><option value="0">Background / erase</option></select></label>
+        <label>Brush<select id="brush"><option value="1">1 stitch</option><option value="2">2×2</option><option value="3">3×3</option></select></label>
+        <label class="check"><input id="knitShape" type="checkbox"> Knit proportions</label>
+        <label class="check"><input id="gridTen" type="checkbox" checked> 10-stitch guides</label>
+      </div>
+      <div class="chart-scroll"><canvas id="chart" tabindex="0" aria-label="Editable knitting chart; tap a square to change its color"></canvas></div>
+      <p class="hint">Tap or drag to paint. Row 1 is at the bottom; your current row is outlined in purple. Flat: odd rows right to left, even rows left to right. In the round: all rows right to left.</p>
+      <div class="floats"><span id="floatInfo"></span><label class="inline-label">Max float<select id="floatMax"><option>5</option><option selected>7</option><option>9</option></select></label></div>
+      <div class="actions"><button id="saveChart" class="primary">♡ Save pattern</button><button id="png">Download PNG</button><button id="print">Print / PDF</button><button id="mirrorChart">⇋ Mirror</button><button id="invertChart">◐ Swap</button><button id="clearChart">Clear</button><button id="saveMotif">♡ Save as my motif</button></div>
+      <div class="progress"><b>Keep your place</b><div class="actions"><button id="prevRow" aria-label="Previous row">−</button><span id="rowCount"></span><button id="nextRow" aria-label="Next row">+</button><button id="resetRow">Reset</button></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="library" hidden>
+  <figure class="kitten-banner"><img class="kitten" src="images/kitten-library.jpg" alt="A kitten curled up on a knitted blanket"><figcaption>Guarding your patterns</figcaption></figure>
+  <div class="section-title"><div><span class="eyebrow">A HOME FOR YOUR IDEAS</span><h2>Pattern library</h2></div></div>
+  <div class="panel"><div class="actions"><label>Filter by yarn weight<select id="filter"></select></label><button id="backup">Export backup</button><label class="upload">Restore backup<input id="restore" type="file" accept="application/json,.json"></label></div><p class="hint">Saved on this browser and device. Export a backup to move your patterns to another phone or protect them before clearing browser data.</p></div>
+  <div id="patterns" class="cards"></div>
+  <details class="panel"><summary>Add a pattern from elsewhere</summary><form id="addPattern"><label>Pattern name<input id="patternName" maxlength="100" required></label><label>Yarn weight<select id="patternWeight"></select></label><label>Pattern link (optional)<input id="patternLink" type="url" placeholder="https://…"></label><label>Notes<textarea id="patternNotes" maxlength="10000" placeholder="Needles, yarn, gauge, where you stored the PDF…"></textarea></label><button class="primary">Save pattern</button></form></details>
+</section>
+
+<section id="help" class="panel" hidden>
+  <figure class="kitten-banner"><img class="kitten" src="images/kitten-help.jpg" alt="A curious kitten peeking over a ball of yarn"><figcaption>Here to help (mostly)</figcaption></figure>
+  <h2>A happy little start</h2>
+  <ol><li>Set your stitch and row counts, pick a motif from the list and choose up to three colors.</li><li>Use Knit controls to change the layout, scale, spacing, mirroring and borders.</li><li>Upload artwork and tune the sliders, type your own grid, or connect AI for free-form ideas.</li><li>Tap squares to adjust. Save under a yarn weight, track your current row, download or print.</li></ol>
+  <h3>Before you cast on</h3>
+  <p>Swatch first: stitch shape and gauge change the finished picture. Knit proportions is a preview, not a gauge calculation. This is a color chart, not a complete knitting pattern. The float check flags long color runs so you can catch floats.</p>
+  <h3>Phone & privacy</h3>
+  <p>Open your GitHub Pages address in your phone browser and use Add to Home Screen if available. Images and patterns stay in your browser. The AI feature is off unless you add your own connector; only your typed prompt and chart size are sent to it.</p>
+</section>
+<footer>Made for slow mornings & beautiful stitches. 🧶</footer>
+</main>
+<dialog id="saveDialog"><form id="saveForm"><h2>Save to your collection</h2><label>Yarn weight<select id="saveWeight"></select></label><label>Notes<textarea id="saveNotes" maxlength="10000" placeholder="Yarn, needle size, gauge…"></textarea></label><div class="actions"><button type="button" id="cancelSave">Cancel</button><button class="primary">Save pattern</button></div></form></dialog>
+<p id="status" role="status" aria-live="polite"></p>
+</body>
+</html>
