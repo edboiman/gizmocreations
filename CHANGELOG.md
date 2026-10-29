@@ -1,3 +1,24 @@
+# Bow & Purl v3.3 — quiet knitting studio
+
+Implemented October 29, 2026.
+
+- Rebuilt the stylesheet around cream, charcoal and restrained rose tokens, system sans typography, serif page headings, consistent touch targets and visible focus states.
+- Replaced repeated work-screen banners with one compact cat portrait. Retained original photos in Help and the authored animated cats in Help and monthly inspiration, with motion preferences intact.
+- Added five black-heart navigation items: Projects, Charts, Stash, Patterns and More. More preserves access to monthly ideas, planner, prices, help, backups and settings.
+- Put the current project session before the other-project filters. Added compact project choices, explicit completed-row/next-row wording and expandable planning/history.
+- Gave the same chart separate Design and Knit presentations, keeping its original lock, painting, keyboard controls, zoom, symbols, row reading, float analysis and exports.
+- Moved stash and pattern results ahead of add/import forms. Grouped secondary filters and card details while keeping unknown quantities explicit.
+- Added a continuous pattern grid, with the existing weight groups and overview still available on demand.
+- Added selected-tier price rows with dates/sources, retaining the full comparison, manual monthly review, CSV tools and recorded quotes.
+- Simplified the project form's first view while retaining every optional field and saved value.
+- Versioned the complete offline shell as 3.3. No new storage schema, runtime dependency, paid asset or remote font was introduced.
+
+**Workers:** unchanged from v3.2. Only deployments still using v3.1/earlier connector code need the previous Worker upgrade described in PUBLISH_TO_GITHUB.md.
+
+**Validation:** see TESTING.md. Nothing was published from this workspace; the release is prepared for the user's existing GitHub Pages site.
+
+---
+
 # Bow & Purl v3.2 changes
 
 Reviewed and implemented October 29, 2026. See `REVIEW.md` for evidence, prioritization and recommendations.

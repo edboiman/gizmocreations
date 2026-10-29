@@ -83,48 +83,55 @@ function projectEstimate(p) {
   return {text:Math.ceil(required)+' yds with a 10% allowance · ≈ '+money(required*rate)+' yarn value ('+(quote?'your recorded purchase price':'weight estimate')+').',
     coverage: !yarn ? '' : available===null ? 'Linked yarn amount is unknown; coverage cannot be checked.' : available>=required ? 'Linked entry has enough estimated yardage. Check dye lot, fiber and gauge.' : 'Linked entry is about '+fmt(required-available)+' yds short with the allowance.'};
 }
+// Selection is presentation-only. On reopening, the most recently updated active
+// project leads. Choosing a project does not alter its rows, history or status.
+let sessionProjectId = null;
 function renderProjects() {
-  const box=$('projectList');box.replaceChildren();
-  const q=$('projectSearch').value.trim().toLowerCase(), status=$('projectFilter').value;
-  const shown=projects.filter(p=>(status==='all'||p.status===status)&&(!q||(p.name+' '+p.notes+' '+p.section).toLowerCase().includes(q))).sort((a,b)=>b.updated.localeCompare(a.updated));
-  $('projectCount').textContent=shown.length+' of '+projects.length+' projects · counters show completed rows';
-  if(!shown.length){const c=textNode('div','',box);c.className='panel empty-state';textNode('h3',projects.length?'No projects match.':'Keep your next stitch close.',c);textNode('p',projects.length?'Try another status or search.':'Start a project here, or choose Start project on a saved pattern. Keep needles, gauge and a note for your next session together.',c);return;}
+  const box=$('projectList'),session=$('projectSession');box.replaceChildren();session.replaceChildren();
+  const sorted=[...projects].sort((a,b)=>b.updated.localeCompare(a.updated));
+  const active=sorted.find(p=>p.id===sessionProjectId&&p.status==='active')||sorted.find(p=>p.status==='active');
+  sessionProjectId=active?.id||null;
+  if(active)renderProjectSession(active,session);
+  const q=$('projectSearch').value.trim().toLowerCase(),status=$('projectFilter').value;
+  const shown=sorted.filter(p=>p.id!==active?.id&&(status==='all'||p.status===status)&&(!q||(p.name+' '+p.notes+' '+p.section).toLowerCase().includes(q)));
+  $('projectCount').textContent=(active?'Other projects · ':'')+shown.length+' matching · '+projects.length+' saved';
+  if(!shown.length&&!active){const c=textNode('div','',box);c.className='panel empty-state';textNode('h3',projects.length?'No projects match.':'Keep your next stitch close.',c);textNode('p',projects.length?'Try another status or search.':'Start a project here, or choose Start project on a saved pattern. Your rows and notes stay together on this device.',c);}
   for(const p of shown){
-    const card=textNode('article','',box);card.className='panel project-card';card.dataset.project=p.id;
-    const top=textNode('div','',card);top.className='project-top';
-    const meta=textNode('div','',top);textNode('span',({active:'ON THE NEEDLES',paused:'TAKING A LITTLE REST',complete:'FINISHED'})[p.status],meta).className='eyebrow';textNode('h3',p.name,meta);
-    const edit=textNode('button','Edit details',top);edit.onclick=()=>openProjectForm(null,p);
-    const linked=patterns.find(n=>n.id===p.patternId), yarn=stash.find(s=>s.id===p.stashId);
-    if(linked)textNode('p','Pattern: '+linked.name,card).className='muted';
-    else if(p.patternId)textNode('p','The linked pattern is no longer in this library. Your project notes and counters are kept.',card).className='warn';
-    if(p.section)textNode('p','Working on: '+p.section,card).className='project-section';
-    const counter=textNode('div','',card);counter.className='project-counter';
-    const minus=textNode('button','−',counter), amount=textNode('div','',counter), plus=textNode('button','+ 1 row',counter);
-    minus.setAttribute('aria-label','Undo one completed row for '+p.name);plus.setAttribute('aria-label','Complete one row for '+p.name);
-    const number=textNode('strong',p.row,amount);number.setAttribute('aria-label',p.row+' completed rows');textNode('span','rows completed',amount);
-    minus.disabled=p.row===0||p.status!=='active';plus.disabled=p.row>=1000000||p.status!=='active';
-    plus.className='primary';plus.id='row-plus-'+p.id;minus.id='row-minus-'+p.id;
-    minus.onclick=()=>updateProject(p.id,n=>n.row--,'Frogged one row',minus.id);
-    plus.onclick=()=>updateProject(p.id,n=>n.row++,'Completed row '+(p.row+1),plus.id);
-    if(p.repeatLength)textNode('p',Math.floor(p.row/p.repeatLength)+' full repeats completed · next: row '+(p.row%p.repeatLength+1)+' of '+p.repeatLength,card).className='repeat-status';
-    if(p.goal){const progress=document.createElement('progress');progress.max=p.goal;progress.value=Math.min(p.row,p.goal);progress.setAttribute('aria-label','Row goal for '+p.name);card.append(progress);textNode('p',Math.min(100,Math.round(p.row/p.goal*100))+'% of '+p.goal+'-row goal (rows only)',card).className='hint';}
-    if(p.counters.length){const extras=textNode('div','',card);extras.className='extra-counters';
-      p.counters.forEach((c,i)=>{const row=textNode('div','',extras);textNode('b',c.name+': '+c.value,row);const sub=textNode('button','−',row),add=textNode('button','+',row);sub.setAttribute('aria-label','Decrease '+c.name+' for '+p.name);add.setAttribute('aria-label','Increase '+c.name+' for '+p.name);sub.disabled=c.value===0||p.status!=='active';add.disabled=c.value>=1000000||p.status!=='active';sub.id='counter-minus-'+i+'-'+p.id;add.id='counter-plus-'+i+'-'+p.id;sub.onclick=()=>updateProject(p.id,n=>n.counters[i].value--,c.name+' decreased',sub.id);add.onclick=()=>updateProject(p.id,n=>n.counters[i].value++,c.name+' increased',add.id);});
-    }
-    if(p.needles||p.gauge)textNode('p',[p.needles?'Needles: '+p.needles:'',p.gauge?'Gauge: '+p.gauge:''].filter(Boolean).join(' · '),card).className='muted';
-    if(p.notes){const note=textNode('p',p.notes,card);note.className='project-notes';}
-    if(yarn)textNode('p','Yarn reference: '+yarn.brand+(yarn.color?' · '+yarn.color:'')+(yarn.dyeLot?' · lot '+yarn.dyeLot:''),card).className='muted';
-    else if(p.stashId)textNode('p','The linked yarn is no longer in your stash. Edit the project to choose a yarn reference.',card).className='warn';
-    const estimate=projectEstimate(p);textNode('p',estimate.text,card).className='hint';if(estimate.coverage)textNode('p',estimate.coverage,card).className='hint';
-    const actions=textNode('div','',card);actions.className='actions';
-    if(linked?.chart){textNode('button','Open linked chart',actions).onclick=()=>{snapshot();state=structuredClone(linked.chart);currentId=linked.id;$('chartMode').value='knit';saveChartView();controls();draw();draft();tab('studio');};}
-    textNode('button',p.status==='active'?'Pause project':'Resume project',actions).onclick=()=>updateProject(p.id,n=>{n.status=p.status==='active'?'paused':'active';n.completed=null;},p.status==='active'?'Project paused':'Project resumed');
-    if(p.status!=='complete')textNode('button','Mark finished',actions).onclick=()=>{if(confirm('Mark “'+p.name+'” as finished? You can resume it later.'))updateProject(p.id,n=>{n.status='complete';n.completed=localPriceDate();},'Project finished');};
-    const details=textNode('details','',card);details.className='sub';textNode('summary','Dates & recent activity',details);
-    textNode('p','Started '+priceDateText(p.started)+(p.completed?' · Finished '+priceDateText(p.completed):''),details).className='hint';
-    const log=textNode('ul','',details);for(const h of [...p.history].reverse().slice(0,10))textNode('li',new Date(h.at).toLocaleString()+' · '+h.event,log);
-    textNode('button','Delete project',details).onclick=()=>{if(confirm('Delete “'+p.name+'” and its counters? Your pattern and stash will be kept.'))if(saveProjects(projects.filter(n=>n.id!==p.id)))renderProjects();};
+    const row=textNode('article','',box);row.className='project-compact';row.dataset.project=p.id;
+    const choice=textNode('div','',row);choice.className='project-choice';const info=textNode('div','',choice);
+    textNode('strong',p.name,info);textNode('p',p.row+' rows completed · '+({active:'On the needles',paused:'Paused',complete:'Finished'})[p.status]+(p.section?' · '+p.section:''),info).className='muted';
+    const resume=textNode('button',p.status==='active'?'Continue knitting':'View project',choice);
+    if(p.status==='active')resume.onclick=()=>{sessionProjectId=p.id;renderProjects();$('projectSession').scrollIntoView({block:'start',behavior:'instant'});$('row-plus-'+p.id)?.focus({preventScroll:true});};
+    else {const details=textNode('details','sub',row);details.className='sub';textNode('summary','Counters & project details',details);renderProjectSession(p,details);resume.onclick=()=>{details.open=true;details.querySelector('summary').focus();};}
   }
+}
+function renderProjectSession(p,box){
+  const card=textNode('article','',box);card.className='panel project-card';card.dataset.project=p.id;
+  const top=textNode('div','',card);top.className='project-top';const meta=textNode('div','',top);
+  textNode('span',({active:'CONTINUE KNITTING',paused:'TAKING A LITTLE REST',complete:'FINISHED'})[p.status],meta).className='eyebrow';textNode('h3',p.name,meta);
+  const edit=textNode('button','Edit details',top);edit.onclick=()=>openProjectForm(null,p);
+  if(p.section)textNode('p',p.section,card).className='project-section';
+  if(p.notes){const note=textNode('p',p.notes,card);note.className='project-notes';if(p.notes.length>240){const full=textNode('details','',card);textNode('summary','Read full session note',full);textNode('p',p.notes,full).style.whiteSpace='pre-wrap';}}
+  const counter=textNode('div','',card);counter.className='project-counter';const minus=textNode('button','−',counter),amount=textNode('div','',counter),plus=textNode('button','Complete row '+(p.row+1),counter);
+  minus.setAttribute('aria-label','Undo one completed row for '+p.name);plus.setAttribute('aria-label','Complete one row for '+p.name);
+  const number=textNode('strong',p.row,amount);number.setAttribute('aria-label',p.row+' completed rows');textNode('span','rows completed',amount);
+  minus.disabled=p.row===0||p.status!=='active';plus.disabled=p.row>=1000000||p.status!=='active';plus.className='primary';plus.id='row-plus-'+p.id;minus.id='row-minus-'+p.id;
+  minus.onclick=()=>updateProject(p.id,n=>n.row--,'Frogged one row',minus.id);plus.onclick=()=>updateProject(p.id,n=>n.row++,'Completed row '+(p.row+1),plus.id);
+  if(p.repeatLength)textNode('p',Math.floor(p.row/p.repeatLength)+' full repeats · next: row '+(p.row%p.repeatLength+1)+' of '+p.repeatLength,card).className='repeat-status';
+  if(p.counters.length){const extras=textNode('div','',card);extras.className='extra-counters';p.counters.forEach((c,i)=>{const row=textNode('div','',extras);textNode('b',c.name+': '+c.value,row);const sub=textNode('button','−',row),add=textNode('button','+',row);sub.setAttribute('aria-label','Decrease '+c.name+' for '+p.name);add.setAttribute('aria-label','Increase '+c.name+' for '+p.name);sub.disabled=c.value===0||p.status!=='active';add.disabled=c.value>=1000000||p.status!=='active';sub.id='counter-minus-'+i+'-'+p.id;add.id='counter-plus-'+i+'-'+p.id;sub.onclick=()=>updateProject(p.id,n=>n.counters[i].value--,c.name+' decreased',sub.id);add.onclick=()=>updateProject(p.id,n=>n.counters[i].value++,c.name+' increased',add.id);});}
+  const linked=patterns.find(n=>n.id===p.patternId),yarn=stash.find(s=>s.id===p.stashId);
+  if(linked?.chart){const chart=textNode('button','Open linked chart · Knit mode',card);chart.onclick=()=>{snapshot();state=structuredClone(linked.chart);currentId=linked.id;$('chartMode').value='knit';saveChartView();controls();draw();draft();tab('studio');window.scrollTo({top:0,behavior:'instant'});};}
+  const details=textNode('details','',card);details.className='sub project-details';textNode('summary','Planning, progress & activity',details);
+  if(linked)textNode('p','Pattern: '+linked.name,details).className='muted';else if(p.patternId)textNode('p','The linked pattern is no longer in this library. Your project notes and counters are kept.',details).className='warn';
+  textNode('p','Completed-row counters and linked chart row markers are separate. Yarn references do not deduct inventory.',details).className='hint';
+  if(p.needles||p.gauge)textNode('p',[p.needles?'Needles: '+p.needles:'',p.gauge?'Gauge: '+p.gauge:''].filter(Boolean).join(' · '),details).className='muted';
+  if(yarn)textNode('p','Yarn: '+yarn.brand+(yarn.color?' · '+yarn.color:'')+(yarn.dyeLot?' · lot '+yarn.dyeLot:''),details).className='muted';else if(p.stashId)textNode('p','The linked yarn is no longer in your stash. Edit the project to choose a yarn reference.',details).className='warn';
+  const estimate=projectEstimate(p);textNode('p',estimate.text,details).className='hint';if(estimate.coverage)textNode('p',estimate.coverage,details).className='hint';
+  if(p.goal){const progress=document.createElement('progress');progress.max=p.goal;progress.value=Math.min(p.row,p.goal);progress.setAttribute('aria-label','Row goal for '+p.name);details.append(progress);textNode('p',Math.min(100,Math.round(p.row/p.goal*100))+'% of '+p.goal+'-row goal (rows only)',details).className='hint';}
+  const actions=textNode('div','',details);actions.className='actions';textNode('button',p.status==='active'?'Pause project':'Resume project',actions).onclick=()=>{sessionProjectId=p.id;updateProject(p.id,n=>{n.status=p.status==='active'?'paused':'active';n.completed=null;},p.status==='active'?'Project paused':'Project resumed');};
+  if(p.status!=='complete')textNode('button','Mark finished',actions).onclick=()=>{if(confirm('Mark “'+p.name+'” as finished? You can resume it later.'))updateProject(p.id,n=>{n.status='complete';n.completed=localPriceDate();},'Project finished');};
+  textNode('p','Started '+priceDateText(p.started)+(p.completed?' · Finished '+priceDateText(p.completed):''),details).className='hint';const log=textNode('ul','',details);for(const h of [...p.history].reverse().slice(0,10))textNode('li',new Date(h.at).toLocaleString()+' · '+h.event,log);
+  textNode('button','Delete project',details).onclick=()=>{if(confirm('Delete “'+p.name+'” and its counters? Your pattern and stash will be kept.'))if(saveProjects(projects.filter(n=>n.id!==p.id)))renderProjects();};
 }
 for(const id of ['projectSearch','projectFilter'])$(id).addEventListener('input',renderProjects);
 document.addEventListener('studio:tab',e=>{if(e.detail==='projects')renderProjects();});

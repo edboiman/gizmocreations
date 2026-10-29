@@ -90,6 +90,7 @@ function transform(grid) {
 
 // ---------- drawing ----------
 function draw() {
+  document.body.dataset.chartMode = $('chartMode').value;
   const c = $('chart'), ctx = c.getContext('2d');
   cellW = 16; cellH = $('knitShape').checked ? 12 : 16;
   c.width = state.cols * cellW + 55; c.height = state.rows * cellH + 44;
@@ -161,6 +162,7 @@ function floatAnalysis(chart, max, circular) {
 function floatCheck() {
   const max = Number($('floatMax').value) || 7;
   const check = floatAnalysis(state, max, $('chartDirection').value === 'round');
+  $('floatSummary').textContent = check.flagged.length ? `${check.flagged.length} rows to review · longest carry ${check.worst} stitches` : `Float review: no carries over ${max} stitches flagged`;
   $('floatInfo').textContent = (check.flagged.length ? `${check.flagged.length} rows have carried-color gaps over ${max} stitches (rows ${check.flagged.slice(0,12).join(', ')}${check.flagged.length>12?', …':''}). Longest: ${check.worst}. Plan float catches.` : `No carried-color gaps over ${max} stitches flagged.`) + (check.threeColor.length ? ` ${check.threeColor.length} rows use three colors; consider two-color revisions.` : '') + ' Counts colors used in each row only; swatch and review yarn carries.';
 }
 function centerCurrentRow() { const viewport=$('chartViewport'),zoom=Number($('chartZoom').value)||1;viewport.scrollTop=Math.max(0,(10+(state.rows-state.row)*cellH)*zoom-viewport.clientHeight/2); }
@@ -350,13 +352,20 @@ $('chart').onkeydown = e => {
 function download(blob, name) { const a = document.createElement('a'), url = URL.createObjectURL(blob); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000); }
 $('png').onclick = () => $('chart').toBlob(b => { if (b) download(b, 'bow-and-purl-chart.png'); });
 $('print').onclick = () => window.print();
-$('chartSettings').onclick = () => { $('generator').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}); $('chartName').focus({preventScroll:true}); };
+$('chartSettings').onclick = () => { $('chartMode').value='edit'; draw(); saveChartView(); $('generator').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}); $('chartName').focus({preventScroll:true}); };
 
 // ---------- tabs & library ----------
-function tab(id) { if (!$(id) || !['studio','monthly','projects','shop','stash','library','prices','help'].includes(id)) return; for (const el of document.querySelectorAll('main>section:not(.hero)')) el.hidden = el.id !== id; document.querySelectorAll('nav button').forEach(b => { b.classList.toggle('active', b.dataset.tab === id); if (b.dataset.tab === id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); $('sectionPicker').value = id; document.body.dataset.section = id; if (id === 'studio') requestAnimationFrame(centerCurrentRow); if (id === 'library') renderLibrary(); if (id === 'shop') if ($('shopResults')) renderShop(); document.dispatchEvent(new CustomEvent('studio:tab', { detail: id })); }
-document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
+function tab(id) { if (!$(id) || !['studio','monthly','projects','shop','stash','library','prices','help'].includes(id)) return; for (const el of document.querySelectorAll('main>section')) el.hidden = el.id !== id; document.querySelectorAll('[data-tab]').forEach(b => { b.classList.toggle('active', b.dataset.tab === id); if (b.dataset.tab === id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); $('openMore').classList.toggle('active',!['projects','studio','stash','library'].includes(id)); $('sectionPicker').value = id; document.body.dataset.section = id; if (id === 'studio') requestAnimationFrame(centerCurrentRow); if (id === 'library') renderLibrary(); if (id === 'shop') if ($('shopResults')) renderShop(); document.dispatchEvent(new CustomEvent('studio:tab', { detail: id })); }
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { const fromMore=$('moreDialog').open; if(fromMore)$('moreDialog').close();tab(b.dataset.tab);window.scrollTo({top:0,behavior:'instant'});if(fromMore){const title=$(b.dataset.tab).querySelector('h2');title?.setAttribute('tabindex','-1');title?.focus({preventScroll:true});} });
+$('openMore').onclick=()=>$('moreDialog').showModal();$('closeMore').onclick=()=>$('moreDialog').close();
+function openDisclosure(id,focusId){$(id).open=true;$(id).scrollIntoView({block:'start',behavior:'instant'});$(focusId)?.focus({preventScroll:true});}
+$('openAddYarn').onclick=()=>openDisclosure('addYarnDetails','stashBrand');
+$('openStashImport').onclick=()=>openDisclosure('stashImportDetails','stashImport');
+$('openPatternImport').onclick=()=>openDisclosure('patternImportDetails','ravUser');
+$('openAddPattern').onclick=()=>openDisclosure('addPatternDetails','patternName');
+$('openPriceUpdate').onclick=()=>openDisclosure('updatePriceDetails','priceUpdateKind');
 $('sectionPicker').onchange = () => tab($('sectionPicker').value);
-$('skipNavigation').onclick=e=>{e.preventDefault();const target=matchMedia('(max-width:760px)').matches?$('sectionPicker'):document.querySelector('nav button.active');target?.focus();};
+$('skipNavigation').onclick=e=>{e.preventDefault();(document.querySelector('#studioNavigation button.active')||$('openMore'))?.focus();};
 $('saveChart').onclick = () => { const p = patterns.find(p => p.id === currentId); $('saveWeight').value = p?.weight || weights[3]; $('saveNotes').value = p?.notes || ''; $('saveDialog').showModal(); };
 $('cancelSave').onclick = () => $('saveDialog').close();
 function persist(next) { if (next.length > 3000 || !next.every(validPattern)) { notify('Patterns could not be saved: check names, links and yardage (maximum 3,000 patterns).'); return false; } if (writeStorage('bow-purl-patterns', next)) { patterns = next; return true; } return false; }
@@ -371,21 +380,25 @@ function patternCard(p, parent) {
   const card = document.createElement('article'); card.className = 'panel card'; parent.append(card);
   if (p.chart) card.append(thumb(p.chart));
   else if (p.photo) { const im = document.createElement('img'); im.src = p.photo; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); card.append(im); }
+  else textNode('div','Bow & Purl',card).className='pattern-placeholder';
   const tag = textNode('span', p.source === 'ravelry' ? ({ library: 'In my Ravelry library', both: 'Favorite · in my library' }[p.ravFrom] || 'Ravelry favorite') : p.source === 'seasonal' ? 'Monthly project idea' : p.chart ? 'Bow & Purl chart' : 'Saved pattern', card); tag.className = 'eyebrow';
   textNode('h2', p.name, card);
+  textNode('p',p.weight.replace(/^\d • /,''),card).className='muted';
   if (p.designer) textNode('p', 'by ' + p.designer, card).className = 'muted';
   const y = yardText(p); if (y) textNode('p', 'Yarn: ' + y + (p.yardageNote ? ' · ' + p.yardageNote : ''), card).className = 'yards';
   else textNode('p', 'Yardage not listed — tap Edit details to add it.', card).className = 'muted';
   if (p.sizes) textNode('p', 'Sizes: ' + p.sizes, card).className = 'muted';
-  if (typeof yarnLines === 'function') { const yl = document.createElement('div'); yl.className = 'yarn-lines'; card.append(yl); yarnLines(p, yl); }
+  if(p.yarns?.length)textNode('p','Pattern yarn: '+p.yarns.join(', '),card).className='muted';
+  const details=textNode('details','',card);details.className='sub pattern-details';textNode('summary','Notes, yarn & details',details);
+  if (typeof yarnLines === 'function') { const yl = document.createElement('div'); yl.className = 'yarn-lines'; details.append(yl); yarnLines(p, yl); }
   if (p.chart) textNode('p', `${p.chart.cols} stitches × ${p.chart.rows} rows · Row ${p.chart.row}`, card);
-  if (p.notes) textNode('p', p.notes, card);
+  if (p.notes) textNode('p', p.notes, details);
   if (p.link) { const a = textNode('a', p.source === 'ravelry' ? 'Open on Ravelry ↗' : 'Open pattern ↗', card); a.href = p.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   const actions = document.createElement('div'); actions.className = 'actions'; card.append(actions);
   textNode('button', 'Start project', actions).onclick = () => openProjectForm(p);
   if (p.chart) textNode('button', 'Open chart', actions).onclick = () => { snapshot(); state = structuredClone(p.chart); currentId = p.id; controls(); draw(); draft(); tab('studio'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  textNode('button', 'Edit details', actions).onclick = () => openPatternDetails(p);
-  textNode('button', 'Delete', actions).onclick = () => { if (confirm(`Delete “${p.name}”? Export a backup first if you want to keep it.`) && persist(patterns.filter(x => x.id !== p.id))) { if (currentId === p.id) currentId = null; renderLibrary(); } };
+  textNode('button', 'Edit details', details).onclick = () => openPatternDetails(p);
+  textNode('button', 'Delete', details).onclick = () => { if (confirm(`Delete “${p.name}”? Export a backup first if you want to keep it.`) && persist(patterns.filter(x => x.id !== p.id))) { if (currentId === p.id) currentId = null; renderLibrary(); } };
 }
 function parseYards(t) { const text = String(t).trim(); if (!text) return {yardsMin:null,yardsMax:null}; if (!/^\d[\d,]*(?:\.\d+)?(?:\s*[-–]\s*\d[\d,]*(?:\.\d+)?)?$/.test(text)) throw Error('Enter yardage as 450 or 400–1200, or leave it blank.'); const n=text.split(/\s*[-–]\s*/).map(x=>Number(x.replace(/,/g,''))); if(n.some(x=>!Number.isFinite(x)||x<0||x>=100000)||n.length>1&&n[0]>n[1]) throw Error('Use yardage below 100,000, with the smaller amount first.'); return {yardsMin:n[0],yardsMax:n[1]??n[0]}; }
 let editingPatternId = null;
@@ -404,6 +417,12 @@ function renderLibrary() {
   const sort = $('sortBy').value;
   const key = p => p.yardsMax ?? p.yardsMin ?? (sort === 'yardsAsc' ? Infinity : -1);
   shown.sort(sort === 'name' ? (a, b) => a.name.localeCompare(b.name) : sort === 'yardsAsc' ? (a, b) => key(a) - key(b) : (a, b) => key(b) - key(a));
+  if(!$('groupPatterns').checked){
+    const cards=textNode('div','',parent);cards.className='cards';const limit=libraryLimits.all||24;
+    shown.slice(0,limit).forEach(p=>patternCard(p,cards));
+    if(shown.length>limit){const more=textNode('button','Show '+Math.min(24,shown.length-limit)+' more patterns',parent);more.id='library-more-all';more.onclick=()=>{libraryLimits.all=limit+24;renderLibrary();$('library-more-all')?.focus({preventScroll:true});};}
+    return;
+  }
   for (const w of weights) {
     const group = shown.filter(p => p.weight === w); if (!group.length) continue;
     const known = group.filter(p => p.yardsMin != null || p.yardsMax != null);
@@ -427,7 +446,7 @@ function renderLibrary() {
   $('summaryWrap').hidden = !summary.children.length;
 }
 function filterLibrary(){libraryLimits=Object.create(null);renderLibrary();}
-for (const id of ['filter', 'sourceFilter', 'sortBy']) $(id).onchange = filterLibrary; $('search').oninput = filterLibrary;
+for (const id of ['filter', 'sourceFilter', 'sortBy','groupPatterns']) $(id).onchange = filterLibrary; $('search').oninput = filterLibrary;
 $('addPattern').onsubmit = e => { e.preventDefault(); try { const link = $('patternLink').value.trim(); if (link && !safeLink(link)) throw Error('Use a valid https:// or http:// pattern link.'); const item = { id: newId(), name: $('patternName').value.trim() || 'Untitled pattern', weight: $('patternWeight').value, notes: $('patternNotes').value, link, ...parseYards($('patternYards').value) }; if (persist([...patterns, item])) { $('addPattern').reset(); renderLibrary(); notify('Pattern added.'); } } catch(err){notify(err.message);} };
 // ---------- Ravelry favorites ----------
 const RAV_WEIGHT = { thread: 0, cobweb: 0, lace: 0, 'light fingering': 1, fingering: 1, sport: 2, dk: 3, worsted: 4, aran: 4, bulky: 5, 'super bulky': 6, jumbo: 7 };
@@ -502,8 +521,8 @@ function renderShop() {
     const h = p.link ? textNode('a', p.name, body) : textNode('b', p.name, body); if (p.link) { h.href = p.link; h.target = '_blank'; h.rel = 'noopener noreferrer'; } h.className = 'shop-name';
     if (p.designer) textNode('span', p.designer, body).className = 'muted';
     textNode('span', lo == null ? 'Yardage not listed' : (lo === hi ? `${fmt(lo)} yds` : `${fmt(lo)}–${fmt(hi)} yds`) + (p.sizes ? ' · ' + p.sizes : ''), body).className = 'muted';
-    const badge = textNode('div', sk ? (sk[0] === sk[1] ? `${sk[0]}` : `${sk[0]}–${sk[1]}`) : '?', row); badge.className = 'skeins';
-    textNode('small', sk ? (sk[1] === 1 ? 'skein' : 'skeins') : per ? 'no yardage' : 'enter skein size', badge);
+    const badge = textNode('div', sk ? (sk[0] === sk[1] ? `${sk[0]}` : `${sk[0]}–${sk[1]}`) : per ? 'Yardage unknown' : 'Enter skein length', row); badge.className = sk ? 'skeins' : 'skeins prompt';
+    if(sk)textNode('small',sk[1] === 1 ? 'skein' : 'skeins',badge);
     if (typeof costText === 'function' && lo != null) { const c = costText(p.weight, lo, hi); if (c) textNode('span', c + ' est.', body).className = 'cost'; }
     if (have && sk && sk[0] <= have && sk[1] > have) textNode('span', `Smaller sizes only with ${have}`, body).className = 'warn';
     if (have && sk && sk[0] > have) textNode('span', `Need ${sk[0] - have} more skein${sk[0] - have > 1 ? 's' : ''} for the smallest size`, body).className = 'warn';

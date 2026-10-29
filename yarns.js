@@ -290,16 +290,18 @@ function renderStash() {
     if (s.yards == null || s.skeins == null) textNode('span', 'Kept in your stash — add amounts whenever you know them.', b).className = 'hint';
     if (s.localQuantities && s.ravId) textNode('span', 'Your local amounts are kept on re-import.', b).className = 'hint';
     if(s.ravStatus)textNode('span','Ravelry status: '+s.ravStatus+(s.localQuantities?' — check your locally recorded amounts.':''),b).className='warn';
-    if(s.fiber||s.dyeLot)textNode('span',[s.fiber,s.dyeLot?'Dye lot: '+s.dyeLot:''].filter(Boolean).join(' · '),b).className='muted';
-    if(s.priceUSD!=null)textNode('span','Recorded purchase: '+money(s.priceUSD)+' per skein'+(s.purchasedAt?' · '+priceDateText(s.purchasedAt):' (undated)'),b).className='hint';
+    const details=textNode('details','',row);details.className='stash-entry-details';textNode('summary','Fiber, purchase & adjustments',details);
+    if(s.fiber||s.dyeLot)textNode('p',[s.fiber,s.dyeLot?'Dye lot: '+s.dyeLot:''].filter(Boolean).join(' · '),details).className='muted';
+    if(s.priceUSD!=null)textNode('p','Recorded purchase: '+money(s.priceUSD)+' per skein'+(s.purchasedAt?' · '+priceDateText(s.purchasedAt):' (undated)'),details).className='hint';
     const act = document.createElement('div'); act.className = 'actions'; row.append(act);
     textNode('button', 'Edit details', act).onclick = () => editStashAmounts(s);
     const minus = textNode('button', '−', act), plus = textNode('button', '+', act);
+    details.append(minus,plus);
     minus.setAttribute('aria-label', 'Use one skein of ' + s.brand); plus.setAttribute('aria-label', 'Add one skein of ' + s.brand);
     minus.disabled = s.skeins == null || s.skeins <= 0 || !(s.yards>0); plus.disabled = s.skeins == null || !(s.yards>0) || s.skeins+1>=1000;
     if(s.skeins!=null&&!(s.yards>0))textNode('span','Use Edit details to adjust totals while per-skein yardage is unknown.',b).className='hint';
     minus.onclick = () => adjustStash(s,-1); plus.onclick = () => adjustStash(s,1);
-    textNode('button', 'Remove', act).onclick = () => { if (confirm(`Remove ${s.brand} from your stash?`)) { saveStash(stash.filter(x => x.id !== s.id)); renderStash(); } };
+    textNode('button', 'Remove', details).onclick = () => { if (confirm(`Remove ${s.brand} from your stash?`)) { saveStash(stash.filter(x => x.id !== s.id)); renderStash(); } };
   }
   // suggestions: one yarn on its own, or all yarns of a weight combined (colorwork, stripes)
   const combine = $('stashCombine').checked;
@@ -345,11 +347,15 @@ function priceDateText(value) { return validPriceDate(value) ? new Date(value+'T
 function renderPrices() {
   $('priceTier').value = String(prices.tier); $('priceSource').textContent = prices.source;
   const tb = $('priceTable'); tb.replaceChildren();
+  $('priceRows').replaceChildren();
   for (const w of weights.slice(0,8)) {
     const tr = document.createElement('tr'); tb.append(tr); textNode('td', w.replace(/^\d • /,''), tr);
     prices.perYard[w].forEach((v,i) => textNode('td', `$${v.toFixed(3)}/yd`, tr).className = i === prices.tier ? 'on' : '');
     textNode('td', money(prices.perYard[w][prices.tier]*220), tr);
     const meta = prices.weightMeta?.[w]?.[prices.tier];
+    const row=textNode('div','',$('priceRows'));row.className='price-row';textNode('strong',w.replace(/^\d • /,''),row);
+    textNode('span',money(prices.perYard[w][prices.tier]*220)+' / 220 yds',row).className='price-value';
+    textNode('p',`$${prices.perYard[w][prices.tier].toFixed(3)}/yd · ${priceDateText(meta?.checkedAt)}${meta?.source?' · '+meta.source:' · estimate'}`,row).className='hint';
     const date = textNode('td', priceDateText(meta?.checkedAt), tr); if (meta?.source) date.title = meta.source;
   }
   const review = priceReviewInfo(prices);
@@ -364,6 +370,7 @@ function renderPrices() {
     textNode('p',`${money(c.price)} / ${fmt(c.yards)} yds · ${c.weight.replace(/^\d • /,'')}`,body);
     textNode('p',`${priceDateText(c.checkedAt)}${c.source ? ' · '+c.source : ''}`,body).className = 'muted';
     textNode('button','Edit quote',row).onclick = () => {
+      $('updatePriceDetails').open=true;
       $('priceUpdateKind').value='yarn'; updatePriceKind(); $('priceUpdateName').value=c.name; $('priceUpdateWeight').value=c.weight; $('priceUpdateCost').value=c.price; $('priceUpdateYards').value=c.yards; $('priceUpdateDate').value=c.checkedAt || localPriceDate(); $('priceUpdateSource').value=c.source || ''; $('priceUpdateName').focus();
     };
   }
@@ -458,4 +465,4 @@ window.addEventListener('focus',()=>{$('priceUpdateDate').max=localPriceDate();r
 
 fillBrandList(); renderPrices();
 const _tab = tab; tab = id => { _tab(id); if (id === 'stash') { fillBrandList(); renderStash(); } if (id === 'prices') renderPrices(); };
-document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => tab(b.dataset.tab));
+// The app's navigation handlers resolve the wrapped tab() at click time.

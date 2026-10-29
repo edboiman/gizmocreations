@@ -1,23 +1,27 @@
-# Bow & Purl v3.2
+# Bow & Purl v3.3
 
 An offline knitting chart studio, pattern library, yarn stash and project notebook. The cat photographs, animated studio cats and solid black navigation hearts remain. The app is plain HTML, CSS and JavaScript: no build step, account, subscription or runtime package install is required.
 
-This release focuses on protecting saved work and making the app useful while actually knitting. Read `REVIEW.md` for the independent audit, evidence, remaining limitations and phased roadmap. `CHANGELOG.md` lists the implemented changes.
+This release applies the approved quiet knitting studio design: cream surfaces, charcoal text, restrained rose, compact cat branding and black-heart navigation. Projects put the working session first; Charts has Design and Knit presentations; inventory and patterns precede setup. The v3.2 storage protections and tools are retained.
 
-## Updating an existing GitHub Pages app
+## Publish to GitHub Pages
 
-1. **In your existing app, export a backup before uploading files.** The v3.1 backup excludes the current chart draft. If that chart is not already in the library, also keep its grid text or download its PNG. Do not clear browser data.
-2. Unzip the download and open the `bow-and-purl` folder. Upload **its contents** to the same repository location where your current `index.html` lives. Keep `images/`, `worker/` and `tests/` as folders. Replace all existing files. Do not upload the ZIP itself or add a second nested `bow-and-purl` folder. There are fewer than 100 files.
-3. If you use Ravelry, redeploy your existing Cloudflare Worker with `worker/ravelry-worker.js`. Keep its existing URL, secrets and app token. The website upload does not update a Cloudflare Worker.
-4. If you use AI, also redeploy `worker/claude-worker.js`. **Set `MODEL` explicitly**, using a model available in your provider account. Keep the provider key in Worker secrets. This release removes the assumed model default and requires exact output dimensions. If you do not use AI, no AI setup is needed.
-5. Let GitHub Pages finish publishing. Open the app online, allow the offline update to download, then **close every Bow & Purl browser tab and home-screen window and reopen it**. The new service worker waits until old tabs are closed. If the old version remains, repeat an online visit and close/reopen once more. Do not clear site data to force an update.
-6. Check that **My projects**, the phone section picker and the chart's **Knit (locked)** mode appear. Wait for **Ready for offline use** before disconnecting.
+Read **`PUBLISH_TO_GITHUB.md`** for the exact upload steps and the optional Worker upgrade notes.
 
-For a new GitHub repository: Settings → Pages → Deploy from a branch → main → root. Keep the app on the same site origin when updating; a different origin has separate browser data. Transfer a backup if you change domains or devices.
+1. Export a backup from your existing app. Keep the same app address to retain browser-local data.
+2. Extract the ZIP and open `bow-and-purl`. Upload **the contents of that folder** where your existing `index.html` lives, replacing matching files and preserving subfolders. Upload every website file together.
+3. Let GitHub Pages finish publishing. Open the existing address online, allow the offline update to download, close all Bow & Purl tabs/home-screen windows, then reopen. Never clear browser data to force the update.
+4. Check the cream/rose design, black-heart navigation and **Knit · locked** view. Wait for **Ready for offline use** before disconnecting.
+
+**Updating from v3.2:** both standalone Workers are unchanged. Keep their code, settings, URLs and secrets.
+
+**Updating directly from v3.1 or earlier:** this ZIP also includes the previous connector fixes. If you use a connector, update its Worker separately as described in `PUBLISH_TO_GITHUB.md`. The AI connector requires an explicit `MODEL`. No connector is needed for local chart, project, stash or monthly tools.
 
 ## What you can do
 
 ### My projects
+
+The most recently updated active project leads when the app opens this screen. Continue knitting selects another active project for the current visit without changing its data. Completing a row updates its activity time, so that session leads on reopening. Search/status filter the other-project list; the working session stays in view. Planning, goal progress, history and status actions expand below the counters.
 
 Start a project directly or from a pattern card. Record the pattern reference, yarn reference, current section, needles, blocked gauge, your size's yardage, notes and start date. Projects support:
 
@@ -34,6 +38,8 @@ Project counters and a linked chart's current-row marker are separate. A yarn re
 If you enter your size's yardage, the planning estimate adds 10%. With a linked yarn's recorded purchase price and known yards per skein, it estimates yarn value from that purchase price; otherwise it uses the selected weight estimate. This is a proportional yarn-value estimate, not a whole-skein shopping total or a fit guarantee.
 
 ### Chart studio
+
+Use **Design · editable** for the motif inspector and drawing. **Knit · locked** hides the design inspector and gives the chart and row controls priority. Chart view & drawing controls, text reading, float details and save/export remain available below. Edit name, motif & dimensions returns to Design.
 
 Choose 8–120 stitches and 8–160 rows. Keep using the 55 supplied motifs/all-over designs, layouts, image conversion, custom typed grids, palettes and saved motifs.
 
@@ -53,13 +59,17 @@ PNG and browser Print/PDF include the chart. Print includes the color key. Large
 
 ### Pattern library
 
+Search comes first. Filter & sort contains weight, source, ordering and grouping. Import patterns opens Ravelry configuration; Add pattern opens the manual form. Notes, yarn alternatives and edit/delete actions expand within each card.
+
 Search by name, designer or notes; filter by weight and source; sort by name or yardage. Edit details in a single dialog. Ravelry imports retain details you edit locally and your notes. Saving a chart keeps existing source, designer, link and yardage metadata.
 
-Cards initially show up to 24 patterns per weight group. Show more expands that group. Counts and yardage summaries still include every match. The yarn overview starts collapsed to keep the library easier to browse.
+The default continuous grid initially shows up to 24 matching patterns. Show more expands it. Under Filter & sort, Group by yarn weight restores separate groups, each with its own paging and a yardage overview. Counts include every match.
 
 Patterns are metadata, notes, links and saved colorwork charts. The app does not import, store or annotate pattern PDFs.
 
 ### Yarn stash
+
+Search and inventory come first. Add yarn and Import open the existing forms on demand. Filter & sort contains weight and ordering. Fiber, purchase records and skein adjustments expand within each entry.
 
 Incomplete Ravelry entries continue to import: missing amounts stay unknown, not zero. Enter per-skein details or a known total. Unknown totals do not count toward coverage estimates.
 
@@ -83,7 +93,7 @@ Data remains on this browser/device. v3.2 migrates the existing data into one sa
 - **Restore backup** accepts versions 1–4. It previews the contents before saving. Choose whether this device's versions or backup versions win for matching IDs, whether to replace the current chart draft, and whether to use the backup's price settings. New items merge in; items absent from the backup are kept.
 - Invalid backup sections reject the restore before saving. A storage failure cannot leave only some sections restored.
 - Invalid saved records are set aside while valid neighbors remain available. Original affected data is kept for a **recovery file**. This diagnostic JSON is separate from normal backup JSON; the normal Restore command does not import recovery files.
-- You can hide the recovery reminder without deleting the retained originals. Download recovery remains available in Pattern library. A new detected issue raises the reminder again.
+- You can hide the recovery reminder without deleting the retained originals. Download recovery and Restore backup remain available under More → Help & settings → Backups & saved data. A new detected issue raises the reminder again.
 - If storage is full/unavailable, a persistent notice appears. Keep the tab open and export current work. Do not assume a disappearing notification means data was saved.
 - If another tab saves newer data, saving pauses in the stale tab. Export any unsaved work there, then reload it.
 
@@ -116,7 +126,7 @@ Use the current `worker/ravelry-worker.js` as a standalone Cloudflare Worker. Se
 | `APP_TOKEN` | Secret random string of 16–512 characters |
 | `ALLOWED_USERNAME` | Optional: restrict notebook requests to your own Ravelry username |
 
-Enter the Worker URL, app token and Ravelry username under Pattern library → Connector settings. This is a manual one-way import; changes in Bow & Purl do not change Ravelry.
+Enter the Worker URL, app token and Ravelry username under Patterns → Import patterns → Connector settings. This is a manual one-way import; changes in Bow & Purl do not change Ravelry.
 
 The Worker reads at most 1,000 favorites and 1,000 library listings, and fetches up to 1,500 distinct pattern details per import. Single-pattern library records are supported; patterns inside books/magazines are not expanded. Stash detail imports are capped at the first 300 listed entries. Truncation and failed stash details are reported. A successful limited import is not proof that every account record was synchronized.
 

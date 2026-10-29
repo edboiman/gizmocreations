@@ -1,3 +1,5 @@
+> Historical v3.2 reliability audit. For the shipped v3.3 visual refresh, read DESIGN.md, CHANGELOG.md and TESTING.md.
+
 # Bow & Purl — independent audit and v3.2 implementation review
 
 **Reviewed:** October 29, 2026. **Input:** `bow-and-purl-v3.1(1).zip`. **Output:** incremental v3.2 update, reproducible tests and this report.

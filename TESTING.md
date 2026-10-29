@@ -1,9 +1,10 @@
-# Bow & Purl v3.2 validation
+# Bow & Purl v3.3 validation
 
 Run date: October 29, 2026.
 
 - **36 dependency-free tests passed**, covering storage migration/recovery, atomic failure, stale-tab detection, request authentication and byte limits, Worker failures, AI dimensions/output limits, Ravelry pack quantities and offline asset consistency.
-- **38 real Chromium browser scenarios passed**, using synthetic profiles and mocked API responses. These cover chart/motif/image/PNG workflows, mouse/touch/keyboard input, metadata/progress, project counters, stash imports and filters, price CSVs, backup/restore, narrow screens and offline reopening.
+- **44 real Chromium browser scenarios passed**, using synthetic profiles and mocked API responses. These cover chart/motif/image/PNG workflows, mouse/touch/keyboard input, metadata/progress, project counters, stash imports and filters, price CSVs, backup/restore, narrow screens and offline reopening.
+- Six refresh-specific browser scenarios cover active-session selection/data retention, 320/390px chart controls above bottom navigation, More-menu focus/routing, continuous/grouped library filtering, dated selected-tier prices, and collapsed-form value retention.
 - **Nine accessibility states checked with axe:** eight desktop sections and the project form, WCAG A/AA tags; zero reported violations in those tested states.
 - All application and Worker JavaScript passed syntax checks. HTML IDs and literal script element references were checked. Versioned HTML assets match service-worker core entries.
 - Defects were also reproduced against the supplied, unmodified v3.1 project: valid records hidden by an invalid neighbor, omitted draft backups, metadata loss on re-save, missed three-color gaps, reversed image compensation, partial restore and a header-only request limit bypass.
@@ -33,8 +34,10 @@ Optional environment variables:
 | Variable | Purpose |
 | --- | --- |
 | `BOW_PURL_QA_DIR` | Destination for local QA screenshots and result JSON. Leave unset if these are not needed. |
-| `BOW_PURL_AXE_PATH` | Absolute path to an installed `axe-core/axe.min.js` for the accessibility sweep. Without it the browser suite runs 37 scenarios. |
+| `BOW_PURL_AXE_PATH` | Absolute path to an installed `axe-core/axe.min.js` for the accessibility sweep. Without it the browser suite runs 43 scenarios. |
 | `CHROMIUM_PATH` | Optional installed Chromium executable when the normal Playwright download is unavailable. The recorded run used a packaged headless Chromium binary. |
+
+The visual refresh retains the exact v3.2 data.js persistence code, standalone Workers, motif definitions, seasonal idea data and image assets. There is no new storage migration. All 36 dependency-free checks also passed on this release.
 
 The app itself does not require `node_modules`, npm installation or these development tools. Do not upload development dependency folders to GitHub Pages.
 

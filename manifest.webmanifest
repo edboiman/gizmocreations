@@ -1,11 +1,28 @@
 {
-  "id": "./", "name": "Bow & Purl", "short_name": "Bow & Purl",
+  "id": "./",
+  "name": "Bow & Purl",
+  "short_name": "Bow & Purl",
   "description": "A cozy knitting studio with offline charts, monthly project ideas and a yarn stash.",
-  "start_url": "./", "scope": "./", "display": "standalone",
-  "background_color": "#fff9f6", "theme_color": "#ba3d65",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F4EF",
+  "theme_color": "#F7F4EF",
   "icons": [
-    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "images/studio-icon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "images/studio-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
   ]
 }

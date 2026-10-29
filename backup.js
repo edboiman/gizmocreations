@@ -87,7 +87,7 @@ function storageStatus() {
   $('downloadRecovery').hidden=!info.recoveryCount&&!info.blocked;
   $('dismissRecovery').hidden=!!info.problem||!info.recoveryCount;
   $('recoveryBackup').hidden=!info.recoveryCount&&!info.blocked;
-  const health=info.problem?'Some work is not saved — export a backup':info.recoveryCount&&!info.recoveryAcknowledged?'Saved data needs recovery review':'Data saves on this browser · export regular backups';
+  const health=info.problem?'Some work is not saved — export a backup':info.recoveryCount&&!info.recoveryAcknowledged?'Saved data needs recovery review':'On this device · export regular backups';
   if($('saveHealth').textContent!==health)$('saveHealth').textContent=health;
 }
 document.addEventListener('bow:storage',storageStatus);storageStatus();
