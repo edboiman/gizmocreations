@@ -1,9 +1,9 @@
 'use strict';
 // Bump VERSION and every ?v= asset reference together when releasing app changes.
-const VERSION = '3.1';
+const VERSION = '3.2';
 const PREFIX = 'bow-purl:' + new URL(self.registration.scope).pathname + ':';
 const CACHE = PREFIX + VERSION;
-const CORE = [ './', './index.html', './style.css?v=3.1', './motifs.js?v=3.1', './llm.js?v=3.1', './app.js?v=3.1', './yarns.js?v=3.1', './seasonal.js?v=3.1', './cats.js?v=3.1', './offline.js?v=3.1', './manifest.webmanifest', './images/studio-icon.svg', './images/icon-192.png', './images/icon-512.png', ...['cats-tree','cat-portrait','cats-bed','cat-peek','cat-nap','cat-yawn'].map(n => './images/' + n + '.jpg?v=3.1') ];
+const CORE = [ './', './index.html', './style.css?v=3.2', './motifs.js?v=3.2', './llm.js?v=3.2', './app.js?v=3.2', './data.js?v=3.2', './projects.js?v=3.2', './backup.js?v=3.2', './yarns.js?v=3.2', './seasonal.js?v=3.2', './cats.js?v=3.2', './offline.js?v=3.2', './manifest.webmanifest', './images/studio-icon.svg', './images/icon-192.png', './images/icon-512.png', ...['cats-tree','cat-portrait','cats-bed','cat-peek','cat-nap','cat-yawn'].map(n => './images/' + n + '.jpg?v=3.2') ];
 const CORE_URLS = new Set(CORE.map(p => new URL(p, self.registration.scope).href));
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

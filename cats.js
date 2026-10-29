@@ -26,7 +26,7 @@ for (const scene of document.querySelectorAll('[data-cat]')) {
     </g>
     <g class="cat-yarn"><circle cx="204" cy="111" r="17" fill="#cc8199" stroke="#a9607b" stroke-width="2"/><path d="M194 98Q215 104 216 121M188 108Q205 111 209 127M202 94Q193 111 198 127M215 99Q199 104 189 117" fill="none" stroke="#f7d6dc" stroke-width="2"/></g>
     <path class="cat-love" d="M178 46C165 35 169 22 179 26C189 17 201 30 190 40L178 51Z" fill="#b63862"/>
-    <g class="cat-snooze" fill="#9c7e9b" font-family="Georgia,serif"><text x="153" y="49" font-size="15">z</text><text x="172" y="34" font-size="20">z</text></g>
+    <g class="cat-snooze" fill="none" stroke="#9c7e9b" stroke-width="2" stroke-linejoin="round"><path d="M154 39H163L153 49H163M173 20H187L172 34H187"/></g>
   </svg>`;
   let loveTimer;
   pet.onclick = () => { clearTimeout(loveTimer); scene.classList.add('is-loved'); notify('Prrr… the studio cat approves of your knitting time.'); loveTimer = setTimeout(() => scene.classList.remove('is-loved'), 1800); };

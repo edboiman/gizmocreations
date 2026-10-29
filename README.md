@@ -1,135 +1,167 @@
-# Bow & Purl v3.1 — matching hearts and monthly price reviews
-A phone-friendly knitting colorwork studio. Static HTML, CSS and JavaScript — no build step. Runs on GitHub Pages.
+# Bow & Purl v3.2
 
-## Updating your existing app
+An offline knitting chart studio, pattern library, yarn stash and project notebook. The cat photographs, animated studio cats and solid black navigation hearts remain. The app is plain HTML, CSS and JavaScript: no build step, account, subscription or runtime package install is required.
 
-1. In the current app, open **Pattern library → Export backup** first.
-2. Unzip this download. Open the `bow-and-purl` folder.
-3. Upload **the contents of that folder** to the same place in your GitHub repository where `index.html` already lives. Replace the existing files and keep `images/` and `worker/` as folders. Do not upload the ZIP itself or nest another `bow-and-purl` folder inside your repository. This package has fewer than 30 files; one upload batch is enough.
-4. Wait for GitHub Pages to finish publishing, then refresh the app. For a future update after v3, close all Bow & Purl browser tabs and the home-screen app, then reopen it to activate the new offline version. Do not clear browser data to update: that can erase your saved stash and patterns.
-5. **For the improved Ravelry connector:** open your existing Ravelry Cloudflare Worker → Edit code, replace the code with `worker/ravelry-worker.js` from this package, then Deploy. Keep the existing variables, secrets, URL and app token. No new account or API key is needed. The AI Worker needs no change.
-6. Open **My stash → Import stash from Ravelry** again. Existing imported records update; missing amount details remain visible as **unknown**. The website change fixes skipping incomplete entries even with the previous stash-capable Worker; the updated Worker also improves partial-pack totals and reports failed detail requests.
+This release focuses on protecting saved work and making the app useful while actually knitting. Read `REVIEW.md` for the independent audit, evidence, remaining limitations and phased roadmap. `CHANGELOG.md` lists the implemented changes.
 
-For a new repository, use Settings → Pages → Deploy from a branch → main → / (root).
+## Updating an existing GitHub Pages app
 
-## New in v3.1
+1. **In your existing app, export a backup before uploading files.** The v3.1 backup excludes the current chart draft. If that chart is not already in the library, also keep its grid text or download its PNG. Do not clear browser data.
+2. Unzip the download and open the `bow-and-purl` folder. Upload **its contents** to the same repository location where your current `index.html` lives. Keep `images/`, `worker/` and `tests/` as folders. Replace all existing files. Do not upload the ZIP itself or add a second nested `bow-and-purl` folder. There are fewer than 100 files.
+3. If you use Ravelry, redeploy your existing Cloudflare Worker with `worker/ravelry-worker.js`. Keep its existing URL, secrets and app token. The website upload does not update a Cloudflare Worker.
+4. If you use AI, also redeploy `worker/claude-worker.js`. **Set `MODEL` explicitly**, using a model available in your provider account. Keep the provider key in Worker secrets. This release removes the assumed model default and requires exact output dimensions. If you do not use AI, no AI setup is needed.
+5. Let GitHub Pages finish publishing. Open the app online, allow the offline update to download, then **close every Bow & Purl browser tab and home-screen window and reopen it**. The new service worker waits until old tabs are closed. If the old version remains, repeat an online visit and close/reopen once more. Do not clear site data to force an update.
+6. Check that **My projects**, the phone section picker and the chart's **Knit (locked)** mode appear. Wait for **Ready for offline use** before disconnecting.
 
-- Every navigation tab uses the same fixed, solid black heart. The icon is vector artwork so device emoji fonts cannot turn it into a colored emoji.
-- **Prices → Monthly price review** shows the last review and next due date. Reviews become due on the first of the following calendar month. This works when you open the app; it does not send background notifications or automatically fetch shop prices.
-- Enter a current price per skein and label yardage directly in **Update a price**. Choose **Weight estimate** to change app cost estimates for that weight and tier. Choose **Named yarn quote** to keep a dated reference quote for a particular yarn. Existing custom quotes have Edit quote buttons.
-- Each edited weight/tier estimate and yarn quote keeps a date checked and optional shop/source. Finishing a monthly review records the overall review without changing individual price dates or inventing new prices.
-- **Download current prices CSV** preserves all weight tiers, named quotes, source notes and checked dates. Four-column CSVs from earlier versions still import into the selected estimate tier.
+For a new GitHub repository: Settings → Pages → Deploy from a branch → main → root. Keep the app on the same site origin when updating; a different origin has separate browser data. Transfer a backup if you change domains or devices.
 
-### Monthly price-update instructions
+## What you can do
 
-1. Open **Prices** at the start of each month. Check your usual shop's regular prices or a recent receipt for yarns you actually use. Record the price per skein in USD and yards per skein. For meters, multiply by 1.0936 to get yards. Checking a shop website needs internet; an existing receipt can be used offline.
-2. Update a few prices with the form. For a weight estimate, use a representative skein for that weight and budget/mid/premium tier. The price divided by its yardage becomes the new price per yard used for project estimates. Named yarn quotes are stored for reference; they do not automatically replace a weight average.
-3. For many prices, download the current CSV, open it in a spreadsheet, edit the price and yardage cells, and save as CSV. Preserve the column order: `type,name,price,yards,weight,tier,source,checked`. Valid tiers are `budget`, `mid`, `premium` (or 0/1/2); dates use `YYYY-MM-DD`. Only change the checked date for rows you really checked. Re-import merges matching rows and retains other saved prices. Invalid rows are counted and skipped.
-4. After reviewing your usual prices, click **Finish this month's review**. The next review becomes due on the first of the next month. This records a manual check; it does not update prices itself.
-5. Export a backup from Pattern library. Dates, notes, prices and review status are included. Price files and backups are per device; use them to transfer updates to another phone or browser.
+### My projects
 
-This release needs only a website-file update. **No new Cloudflare Worker deployment is needed if you already installed the v3 Worker.** After uploading the new files, open the app online once to let the offline update download, close every Bow & Purl tab/home-screen window, then reopen it. If the previous version remains, repeat closing and reopening after the download finishes. Do not clear site data to update.
+Start a project directly or from a pattern card. Record the pattern reference, yarn reference, current section, needles, blocked gauge, your size's yardage, notes and start date. Projects support:
 
-## New in v3
+- A large completed-row counter with a one-row correction button.
+- An optional row goal and a repeat position derived from completed rows.
+- Two optional independent named counters, such as decreases and cable crossings.
+- Pausing, resuming, finishing dates and recent activity.
+- An optional keep-screen-awake control on browsers that support it.
 
-- **Animated studio cats:** blinking, kneading paws, moving tails, rolling yarn, and a sleepy cat on the ideas tab. Tap for a heart. Pause cats is remembered on this device; reduced-motion settings are respected.
-- **Monthly ideas:** 48 original project briefs, four for each month. The device date selects the current month. Browse other months and filter by yarn weight, skill or stash yardage. Southern hemisphere seasons shift six months; calendar themes stay with their month.
-- **Save or design:** Save idea adds the brief to the Pattern library. Set up chart fills chart controls; Generate applies them, and Undo restores the previous chart. Briefs are inspiration with approximate planning yardage, not full garment patterns. Choose a tested pattern and swatch for your measurements.
-- **Incomplete stash imports:** missing skein counts or yards no longer discard a yarn. Edit amounts accepts either skein details or total yards. Unknown quantities stay unknown and do not count as zero or produce misleading project matches. Locally edited amounts survive re-imports; they do not change Ravelry.
-- **More reliable backups:** keep incomplete stash records, Ravelry identifiers, local quantity corrections, saved yarns and price settings. Older v1/v2 backups still load. Restore adds stash records without duplicating matching IDs and keeps existing entries. Saved price settings restore when the device still uses built-in estimates; existing custom prices are kept.
-- **Float check fix:** long runs at the beginning of multicolor rows are now flagged. This remains a simple color-run guide, especially for three-color designs; review actual floats yourself.
+The repeat line shows the **next row to work**. Twelve completed rows of a twelve-row repeat means one repeat completed and row one next.
 
-## Offline use
+Project counters and a linked chart's current-row marker are separate. A yarn reference does **not** reserve inventory or deduct skeins. Multiple projects may reference the same stash entry. This release has one yarn reference per project; multi-yarn allocation is a future upgrade.
 
-Open the published HTTPS app once while connected and wait for **Ready for offline use** at the bottom. This saves the app, cat photos, animations, motif library and monthly ideas on that browser/device. You can then reopen the same address or home-screen app offline.
+If you enter your size's yardage, the planning estimate adds 10%. With a linked yarn's recorded purchase price and known yards per skein, it estimates yarn value from that purchase price; otherwise it uses the selected weight estimate. This is a proportional yarn-value estimate, not a whole-skein shopping total or a fit guarantee.
 
-| Feature | Works offline after setup? |
+### Chart studio
+
+Choose 8–120 stitches and 8–160 rows. Keep using the 55 supplied motifs/all-over designs, layouts, image conversion, custom typed grids, palettes and saved motifs.
+
+- **Edit chart:** tap/drag to paint. Arrow keys move the keyboard cursor; Space paints a stitch.
+- **Knit (locked):** touch cannot paint. Swipe to pan and use the row controls.
+- **Undo / Redo:** up to 30 editing steps; changing the chart's saved-pattern association is tracked too.
+- **In rounds / Flat:** row text and column numbering follow the selected direction.
+- **Show color symbols:** dot = background, cross = motif, circle = accent. These identify yarn colors, not knit/purl operations.
+- **Read the current row as text:** gives color runs in working order.
+- **Zoom:** 75%, 100%, 150% or 200%.
+
+The float guide estimates gaps for each color actually used in that row, including the join for rounds. A color missing from an entire row is not included. Edge carries and where you introduce/drop yarn still need judgment. Three-color rows are flagged. The guide does not certify a chart as technically correct.
+
+Knit proportions use a fixed 4:3 stitch-width-to-height assumption. Image conversion now compensates in the correct direction. This is still a preview, not your personal gauge. Use a swatch. Images must be under 12 MB and 32 megapixels.
+
+PNG and browser Print/PDF include the chart. Print includes the color key. Large charts shrink to fit; tiled multi-page printing is not implemented.
+
+### Pattern library
+
+Search by name, designer or notes; filter by weight and source; sort by name or yardage. Edit details in a single dialog. Ravelry imports retain details you edit locally and your notes. Saving a chart keeps existing source, designer, link and yardage metadata.
+
+Cards initially show up to 24 patterns per weight group. Show more expands that group. Counts and yardage summaries still include every match. The yarn overview starts collapsed to keep the library easier to browse.
+
+Patterns are metadata, notes, links and saved colorwork charts. The app does not import, store or annotate pattern PDFs.
+
+### Yarn stash
+
+Incomplete Ravelry entries continue to import: missing amounts stay unknown, not zero. Enter per-skein details or a known total. Unknown totals do not count toward coverage estimates.
+
+Search yarn, color, fiber and dye lot; filter by weight; sort by name, amount or unknown quantities. Record fiber, dye lot, paid price per skein and purchase date. Enter length in yards or meters; the app stores yards using `1 yard = 0.9144 meters`. Edit amounts are in yards.
+
+Quantity corrections and manually edited yarn details survive re-import. If the Worker returns a used-up/gifted/sold/traded status, an uncorrected imported entry becomes unavailable; explicit local quantity corrections are kept and shown for review. A partial import does not delete absent entries. Review disposed yarn that was not returned by the API yourself.
+
+The +/− skein buttons require known per-skein yardage so they cannot destroy an independently recorded total. Use Edit details otherwise. Stash suggestions compare yardage only. Matching weight does not prove compatible fiber, gauge, construction, color proportions or dye lots.
+
+### Monthly ideas
+
+There are 48 original, bundled project briefs, four per month. Month, hemisphere, weight, skill and stash filters work offline. Southern-hemisphere seasonal ideas shift six months; calendar themes keep their calendar month. Ideas repeat annually and are not live weather recommendations.
+
+Save idea adds a brief to the library. Set up chart fills studio settings; Generate applies them. These are inspiration briefs with rough planning yardage, not complete tested garment patterns.
+
+## Saving, backups and recovery
+
+Data remains on this browser/device. v3.2 migrates the existing data into one saved record, allowing a multi-section restore to succeed or fail as one update. Original legacy keys are retained as a safety copy; they are not continuously synchronized with older app versions.
+
+- **Export backup** is available on every section. Version 4 backup JSON includes patterns, the current draft, projects, stash, motifs, saved yarns, prices and seasonal preferences. Connector credentials and tokens are excluded.
+- **Restore backup** accepts versions 1–4. It previews the contents before saving. Choose whether this device's versions or backup versions win for matching IDs, whether to replace the current chart draft, and whether to use the backup's price settings. New items merge in; items absent from the backup are kept.
+- Invalid backup sections reject the restore before saving. A storage failure cannot leave only some sections restored.
+- Invalid saved records are set aside while valid neighbors remain available. Original affected data is kept for a **recovery file**. This diagnostic JSON is separate from normal backup JSON; the normal Restore command does not import recovery files.
+- You can hide the recovery reminder without deleting the retained originals. Download recovery remains available in Pattern library. A new detected issue raises the reminder again.
+- If storage is full/unavailable, a persistent notice appears. Keep the tab open and export current work. Do not assume a disappearing notification means data was saved.
+- If another tab saves newer data, saving pauses in the stale tab. Export any unsaved work there, then reload it.
+
+Keep regular backups outside the browser. The app cannot prevent browser data eviction, a device failure or someone clearing site data. Retaining legacy/recovery copies also needs space; very full existing stores may be unable to migrate until you have exported and safely resolved the storage issue. There is no automatic cloud backup.
+
+Limits: 3,000 patterns, 500 stash entries, 500 projects, 300 saved yarn definitions, 25 MB per backup import. Browser storage capacity may be reached before these item counts, especially with large charts.
+
+## Updating prices each month
+
+Built-in prices remain undated estimates in USD, not verified current shop prices. The app never fetches monthly prices automatically.
+
+1. Open **Prices** at the beginning of the month. Check your usual shop or receipts for yarns you actually use. Record the skein price and label yardage.
+2. In **Update a price**, choose **Weight estimate** to change estimates throughout the app for that weight/tier. Choose **Named yarn quote** for a dated reference quote. Named quotes do not automatically replace a weight average. Historical purchase prices belong on stash entries.
+3. For several changes, download the current CSV, edit it and import it. Keep this column order: `type,name,price,yards,weight,tier,source,checked`. Prices and yardage must be positive. Dates use `YYYY-MM-DD`; leave an unchecked date blank. Tiers are `budget`, `mid`, `premium` or `0/1/2`.
+4. Four-column files still work: `weight,Fingering,12,400` or `yarn,Cascade 220,10.99,220`. Example prices in the downloaded template are samples.
+5. Record a checked date only for prices you checked. Tap **Finish this month's review** after reviewing the prices you use. This records the review; it does not fetch or change prices. The next review is due on the first of the next calendar month.
+6. Export a backup after editing. Price CSVs and JSON backups work offline. Opening shop listings requires internet. The review reminder appears when you use the app, not as a closed-app notification.
+
+CSV export prefixes formula-like text with an apostrophe for spreadsheet safety. That apostrophe can remain literal if you re-import an unusual formula-like yarn name. JSON backups preserve original names.
+
+## Optional Ravelry connector
+
+Use the current `worker/ravelry-worker.js` as a standalone Cloudflare Worker. Set:
+
+| Setting | Value |
 | --- | --- |
-| Monthly ideas, filters and animated cats | Yes |
-| Creating/editing charts, local image conversion, row counter | Yes |
-| Saved pattern details and stash, editing quantities | Yes |
-| Built-in yarn/price data and JSON backup export/restore | Yes |
-| New Ravelry imports and Ravelry yarn searches | Needs internet |
-| Optional AI designs and external pattern links/photos | Needs internet |
+| `RAVELRY_USER` | Secret API credential username, not necessarily your Ravelry login |
+| `RAVELRY_PASS` | Secret API credential password |
+| `ALLOWED_ORIGIN` | Exact site origin, e.g. `https://yourname.github.io`, without a path or trailing slash |
+| `APP_TOKEN` | Secret random string of 16–512 characters |
+| `ALLOWED_USERNAME` | Optional: restrict notebook requests to your own Ravelry username |
 
-Monthly ideas are bundled in `seasonal.js`; there is no AI call, subscription or live lookup. They repeat each year. Add new briefs to that file in a future release. Browser data and offline caches can be removed by the browser or by clearing site data; keep exported backups. The first online visit is needed on each device. Opening `index.html` directly as a file does not install the offline cache.
+Enter the Worker URL, app token and Ravelry username under Pattern library → Connector settings. This is a manual one-way import; changes in Bow & Purl do not change Ravelry.
 
-The app stays buildless: plain HTML/CSS/JavaScript. All new assets are local, with no downloaded animation library or web fonts. The Worker scripts are deployed separately and are not part of the offline cache.
+The Worker reads at most 1,000 favorites and 1,000 library listings, and fetches up to 1,500 distinct pattern details per import. Single-pattern library records are supported; patterns inside books/magazines are not expanded. Stash detail imports are capped at the first 300 listed entries. Truncation and failed stash details are reported. A successful limited import is not proof that every account record was synchronized.
 
-## Validation for v3
+Credential scopes and resource privacy can restrict access. Do not make private data public merely to work around an error. This package does not establish what private-library access your credentials grant.
 
-Checked the desktop and 390px phone layouts; saving unknown stash amounts, editing to fractional skeins, stash matching, saving ideas, chart setup/generation/undo; JavaScript syntax; and regression fixtures for incomplete/repeated imports, local corrections, backup restore, all 12 months and both hemispheres, and partial Ravelry pack totals. A cache test verified offline navigation and asset loading at a GitHub Pages-style subpath with the network disabled. The internal preview uses HTTP, so actual service-worker installation and airplane-mode reopening must be checked on your published HTTPS app. No live Ravelry account credentials were used in testing.
+The API documentation/agreement requires a signed-in Ravelry account. The public review could not verify that agreement. Before commercial distribution, check the exact API agreement and permissions granted to your app with Ravelry; technical access does not establish commercial permission.
 
-## What's new in v2
-- **55-design dropdown**: 23 cute & cozy motifs, 25 original game/fantasy pixel designs (swords, shields, potions, dragon, slime, wizard hat, runes, dice…), 7 all-over patterns (argyle, peerie, zigzag, dots…). Plus "Surprise me".
-- **Three colors** (background, motif, accent) with preset palettes and a "two colors only" switch.
-- **Knit controls**: grid, half-drop, brick, single band (yokes/hems) or centred layout; scale 1–4× or auto; gap across/down; mirror, flip, swap colors, peerie border.
-- **Editor**: accent paint, 2×2 / 3×3 brush, 10-stitch guide lines, current-row highlight, mirror/swap/clear, and a **float checker** that flags color runs longer than 5/7/9 stitches.
-- **Better image conversion**: live darkness and contrast sliders, 2 or 3 colors, optional dithering, lone-stitch cleanup, fit/fill/stretch, and knit-proportion correction.
-- **Type your own grid**: paste rows of 0/1/2 (or . # @); "Copy chart into box" exports the current chart as text.
-- **My motifs**: tap "♡ Save as my motif" to crop the current chart and add it to the top of the motif dropdown. Build designs by typing a grid, uploading an image or painting. Saved per device and included in backups.
-- **Yarn shop tab**: pick the weight on a yarn label and enter the skein length (yards or meters). See every matching pattern from your library with yardage and skeins needed, smallest to largest size. Optionally enter how many skeins you'd buy to see what fits.
-- **Ravelry favorites + library**: import patterns you've favorited and the patterns in your Ravelry library. The library groups them by yarn weight, shows yards per pattern, and a "Yarn at a glance" table with totals and averages per weight. Search, sort by yardage and filter by source.
-- **Yardage on any pattern**: add or edit yards on your own patterns too.
-- **Library thumbnails**. Old v1 charts and backups still load.
+## Optional AI connector
 
-## Cat photos
-The hero and each tab use the owner's own cat photos in `images/` (resized, with all EXIF/GPS metadata removed). To swap one, replace the file with the same name.
+Deploy `worker/claude-worker.js` and configure:
 
-## Yarn, stash and prices
-- **Yarn suggestions**: every pattern shows the yarn the designer used (from Ravelry, when listed) plus common brands for its weight.
-- **Yarn library**: 135 built-in yarns (indie brands plus craft-store staples like Caron, Bernat, Red Heart, Lion Brand, Loops & Threads, Premier, Lily and Scheepjes), including Knitting for Olive, Sandnes Garn, Drops, Isager, Brooklyn Tweed, Hedgehog Fibres, La Bien Aimée, Biches & Bûches, Jamieson's and more. Yardages and prices are approximate; KFO Merino and Heavy Merino were checked against retailer listings.
-- **Ravelry yarn search**: in My stash, tap 🔍 Ravelry to search Ravelry's whole yarn database (any brand). Picking a result fills in weight and yardage and saves that yarn, so it also shows up in suggestions for patterns of that weight. Uses the Ravelry connector; redeploy `worker/ravelry-worker.js` to enable it.
-- **Yarn dropdown**: in My stash, yarns already in your stash come first, then yarns designers used in your saved patterns, then yarns saved from Ravelry, then everything by weight. Choosing one fills in weight, yardage and the color you last had of it; the color box suggests your colors first, then common color names.
-- **Import stash from Ravelry**: My stash → Import stash from Ravelry. Brings in yarn, weight, yards per skein, skeins and colorway. Re-importing updates those entries (marked ↻); yarns you added by hand are kept. Items marked used up, gifted, traded or sold are skipped. Missing yardage or skein counts are imported as unknown. Reads up to 300 stash entries. Use the updated connector for complete pack-total handling.
-- **My stash tab**: add brand, weight, yards per skein and skeins (pick a known yarn to auto-fill). It lists patterns from your library that each yarn covers, or all yarns of a weight combined, with "every size fits" or "smaller sizes fit" and leftovers.
-- **Prices tab**: built-in rough 2026 US Midwest averages per yard in budget, mid and premium tiers, used for cost estimates across the app. Import your own CSV (`yarn,Cascade 220,10.99,220` or `weight,Fingering,12,400`; price per skein); "Download template" shows the format. Brand yardages and prices are typical values; check ball bands and your shop.
+| Setting | Value |
+| --- | --- |
+| `PROVIDER` | `anthropic` (default) or `openai` |
+| `MODEL` | Explicit provider model available in your account; required |
+| `ANTHROPIC_API_KEY` | Secret, for Anthropic |
+| `OPENAI_API_KEY` | Secret, for OpenAI |
+| `ALLOWED_ORIGIN` | Exact site origin |
+| `APP_TOKEN` | Secret random string of 16–512 characters |
 
-## Optional AI design (Claude or ChatGPT)
-`llm.js` sends a prompt to a small connector that you host; the connector holds the API key. **Never put an API key in the GitHub files** — anyone could read it.
+In Chart studio → Design with AI → AI settings, enter the Worker URL and app token. Do not enter a provider API key into the public app. Your prompt and dimensions go to your Worker/provider. The provider may charge for requests.
 
-1. Create a free Cloudflare account → Workers → Create Worker → paste `worker/claude-worker.js` → Deploy.
-2. In the Worker's Settings → Variables add:
-   - `ANTHROPIC_API_KEY` (as a secret) — from console.anthropic.com. **Or** for ChatGPT: `PROVIDER=openai`, `OPENAI_API_KEY` (secret) and `MODEL` (an OpenAI model name).
-   - `ALLOWED_ORIGIN` = your Pages address, e.g. `https://yourname.github.io`
-   - `APP_TOKEN` (secret) = a random string of 16+ characters (required).
-3. Add a rate-limiting rule for the Worker and set a monthly spending limit with your AI provider.
-4. In the app: Chart studio → Design with AI → AI settings. Paste the Worker URL and app token, then Save.
+The Worker validates exact chart dimensions, caps output tokens and times out upstream requests. Some selected models may have smaller output limits or incompatible API capabilities. Use a model that supports the requested output size. AI still cannot validate fit, yarn usage or all knitting technique constraints.
 
-The connector asks for original designs and validates the returned grid before the app accepts it. AI output still needs a human check for knittability.
+**Configure Cloudflare rate limiting and provider spending limits separately.** A browser token is a bearer credential, not multi-user authentication. Anyone who obtains it can call the connector. CORS is not a spending limit. Do not publish the token or put it into frontend source code.
 
-## Ravelry setup (about 10 minutes, free)
-Ravelry requires API credentials, and they must not go in the public GitHub files, so a tiny connector holds them.
-1. Sign in to Ravelry and open https://www.ravelry.com/pro/developer. Create an app and choose **Basic Auth – read only**. Note the username and password it shows (these are API credentials, not your login).
-2. Cloudflare → Workers → Create Worker → paste `worker/ravelry-worker.js` → Deploy.
-3. Worker Settings → Variables: `RAVELRY_USER` and `RAVELRY_PASS` (as secrets, from step 1), `ALLOWED_ORIGIN` = your Pages address (e.g. `https://yourname.github.io`), `APP_TOKEN` (secret) = a random string of 16+ characters (required).
-4. In the app: Pattern library → Connector settings → paste the Worker URL and app token. Enter your Ravelry username, choose Favorites + library, and tap **Import from Ravelry**.
+## Offline access and privacy
 
-Re-importing updates existing patterns without touching your notes. Imports up to 2,000 patterns. The library import includes single patterns (PDFs, purchases); patterns inside books and magazines in your Ravelry library aren't included, so favorite those individually or add them by hand. If your library is private, only favorites are imported. Patterns without yardage on Ravelry show "Yardage not listed"; tap Edit details to fill it in. Yardage ranges run from smallest to largest size. Use of the Ravelry API is subject to Ravelry's API terms; this read-only setup is intended for personal use.
+Wait for Ready for offline use on each browser/device after an online visit. Then the same address can reopen offline, including at a GitHub Pages subpath.
 
-## Design notes
-All motifs are original artwork. The app does not include licensed characters, game logos or emblems; the AI connector is instructed to make original designs in the same spirit if asked for one.
+| Works offline after installation | Needs internet |
+| --- | --- |
+| Charts, row text, editing and saved motifs | New AI designs |
+| Projects, counters, notes and saved data | Ravelry imports/searches |
+| Monthly ideas and stash estimates | External pattern websites/photos |
+| JSON backup/restore and saved price CSVs | Checking current shop listings |
 
-## Security
-- No API keys or Ravelry credentials are in the site files; they live only in the Cloudflare Workers as secrets.
-- Both connectors refuse to run unless `ALLOWED_ORIGIN` and a 16+ character `APP_TOKEN` are set, check the token in constant time, and reject large requests.
-- The app token is stored in your browser on this device. Anyone with it can use your connectors, so don't share it. If it leaks, change `APP_TOKEN` in Cloudflare and re-enter it in the app.
-- **Add a rate-limiting rule** to each Worker (Cloudflare → Security → WAF → Rate limiting, e.g. 30 requests per minute) and set a **monthly spending cap** with your AI provider.
-- All pages on `yourname.github.io` share browser storage. Don't host other people's code under the same GitHub Pages address, or use a custom domain for this app.
-- A Content Security Policy blocks outside scripts. All user text is shown as plain text, and links are limited to http(s).
-- Imported backups and price files are validated before use.
-- Ravelry pattern photos load from Ravelry's servers, which see your IP address like any image on the web.
+The authored app shell is cached; Worker responses and external photos are not. Opening `index.html` directly as a local file does not install an offline service worker.
 
-## Limits
-Patterns, stash and prices are stored in the browser on one device; backups include them. No accounts or sync. The float check is a guide, not a full stranded-knitting review. Test on a real phone and print once before sharing with customers.
+Provider keys and Ravelry API credentials live on Workers. App tokens remain in device browser storage and are masked in settings. All pages on one GitHub Pages origin share browser storage: avoid untrusted applications on that same origin. There is no analytics SDK or remote font dependency. User text is rendered as text; the only SVG markup assembled with `innerHTML` is fixed, authored cat artwork.
 
-## Troubleshooting the Ravelry import
-The app now says what went wrong. Common causes:
-- **"out of date"**: paste the newest `worker/ravelry-worker.js` into Cloudflare and click Deploy (the old one only knows patterns).
-- **"could not reach your connector"**: wrong Connector URL, or `ALLOWED_ORIGIN` in Cloudflare doesn't exactly match your site address (`https://name.github.io`, no trailing slash or path).
-- **"app token doesn't match"**: the token in the app must equal `APP_TOKEN` in Cloudflare.
-- **"stash is private" / "empty stash"**: the connector uses read-only keys, which I believe can only read what you've made public. Set your stash (and favorites/library) to visible in Ravelry → Settings → Privacy, import, then set it back.
-- Settings are saved as you type, so you no longer need to run the pattern import first.
+## Tests and known limits
 
-## Validation for v3.1
-Checked direct price edits and review dates in the browser; legacy and extended CSV round-trips across all tiers; quoted yarn names; invalid rows; month/year review rollover; backup metadata; and JavaScript syntax. Offline cache references were updated together to v3.1.
+Run dependency-free checks with `node tests/run-tests.mjs`.
+
+For browser checks, install Playwright as a development tool, install its Chromium browser, then run `node tests/browser-tests.cjs`. This starts its own local server and synthetic browser profiles. `BOW_PURL_QA_DIR` optionally writes internal test screenshots/results. `BOW_PURL_AXE_PATH` optionally points to an installed `axe-core/axe.min.js` for the accessibility sweep. These test dependencies are not loaded by the app or needed for GitHub Pages.
+
+See `TESTING.md` for recorded results and remaining device checks. Live Ravelry and paid AI requests were not exercised with account credentials. iOS Safari, physical-device wake lock and real device eviction are not certified by Chromium emulation. Full PDF reading, multi-yarn reservations, a needle inventory, row-specific reminders, tiled printouts and automatic multi-device sync are not implemented.

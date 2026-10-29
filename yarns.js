@@ -12,10 +12,10 @@ const YARN_BRANDS = {
     ['Isager', 'Silk Mohair', 232, 'Mohair / silk', 16], ['Rowan', 'Kidsilk Haze', 229, 'Mohair / silk', 15], ['Lana Grossa', 'Silkhair', 229, 'Mohair / silk', 12],
     ['La Bien Aimée', 'Mohair Silk', 459, 'Mohair / silk', 32], ['Cascade', 'Heritage Silk Lace', 875, 'Merino / silk', 16]],
   '1 • Super fine / Fingering': [
-    ['Knitting for Olive', 'Merino', 273, 'Merino', 10.5], ['Knitting for Olive', 'Pure Silk', 273, 'Silk', 22], ['Knitting for Olive', 'Compatible Cashmere', 273, 'Cashmere', 24],
+    ['Hedgehog Fibres', 'Skinny Singles', 400, 'Superwash merino', 32], ['Knitting for Olive', 'Merino', 273, 'Merino', 10.5], ['Knitting for Olive', 'Pure Silk', 273, 'Silk', 22], ['Knitting for Olive', 'Compatible Cashmere', 273, 'Cashmere', 24],
     ['Malabrigo', 'Sock', 440, 'Merino', 20], ['Madelinetosh', 'Tosh Merino Light', 420, 'Merino', 27], ['Hedgehog Fibres', 'Sock', 437, 'Merino / nylon', 32],
     ['La Bien Aimée', 'Merino Singles', 400, 'Merino', 32], ['Miss Babs', 'Yummy 2-Ply', 400, 'Merino', 30], ['Neighborhood Fiber Co', 'Studio Sock', 400, 'Merino', 30],
-    ['Qing Fibre', 'Merino Singles', 366, 'Merino', 30], ['Spincycle', 'Dream State', 465, 'Wool / mohair', 32], ['Brooklyn Tweed', 'Loft', 275, 'Wool', 18],
+    ['Qing Fibre', 'Merino Singles', 366, 'Merino', 30], ['Brooklyn Tweed', 'Loft', 275, 'Wool', 18],
     ['Sandnes Garn', 'Sunday', 257, 'Merino', 9], ['Sandnes Garn', 'Tynn Peer Gynt', 224, 'Wool', 8], ['Drops', 'Alpaca', 182, 'Alpaca', 4], ['Drops', 'Fabel', 224, 'Wool / nylon', 3.5],
     ['Holst Garn', 'Supersoft', 314, 'Wool', 6], ['Rauma', 'Finull', 191, 'Wool', 7], ['Biches & Bûches', 'Le Petit Lambswool', 284, 'Lambswool', 14],
     ['Jamieson & Smith', '2 Ply Jumper Weight', 125, 'Shetland wool', 6], ['Jamieson’s', 'Spindrift', 115, 'Shetland wool', 6], ['Tukuwool', 'Fingering', 191, 'Wool', 9],
@@ -26,13 +26,13 @@ const YARN_BRANDS = {
     ['Cascade', '220 Sport', 164, 'Wool', 8], ['Berroco', 'Ultra Wool Fine', 433, 'Wool', 16], ['Brooklyn Tweed', 'Peerie', 210, 'Merino', 14],
     ['Biches & Bûches', 'Le Gros Lambswool', 185, 'Lambswool', 16], ['Purl Soho', 'Linen Quill', 439, 'Wool / alpaca / linen', 26]],
   '3 • Light / DK': [
-    ['Paintbox', 'Simply DK', 302, 'Acrylic', 4], ['Rowan', 'Felted Tweed', 191, 'Wool / alpaca / viscose', 15], ['Lion Brand', 'Coboo', 232, 'Cotton / bamboo', 8],
+    ['Lion Brand', 'Truboo', 241, 'Rayon from bamboo', 7], ['Paintbox', 'Simply DK', 302, 'Acrylic', 4], ['Rowan', 'Felted Tweed', 191, 'Wool / alpaca / viscose', 15], ['Lion Brand', 'Coboo', 232, 'Cotton / bamboo', 8],
     ['Knit Picks', 'Swish DK', 123, 'Superwash merino', 5], ['West Yorkshire Spinners', 'Bo Peep DK', 245, 'Wool / nylon', 14],
     ['Drops', 'Karisma', 109, 'Wool', 3.5], ['Drops', 'Merino Extra Fine', 115, 'Merino', 4.5], ['Sandnes Garn', 'Double Sunday', 118, 'Merino', 9], ['Sandnes Garn', 'Peer Gynt', 98, 'Wool', 8],
     ['Brooklyn Tweed', 'Arbor', 145, 'Wool', 14], ['Woolfolk', 'Får', 142, 'Merino', 22], ['Malabrigo', 'Arroyo', 335, 'Superwash merino', 18],
-    ['Hedgehog Fibres', 'Skinny Singles', 400, 'Merino', 32], ['De Rerum Natura', 'Gilliatt', 273, 'Merino', 22], ['Lang', 'Merino 120', 131, 'Merino', 8]],
+    ['De Rerum Natura', 'Gilliatt', 273, 'Merino', 22], ['Lang', 'Merino 120', 131, 'Merino', 8]],
   '4 • Medium / Worsted / Aran': [
-    ['Knitting for Olive', 'Heavy Merino', 136, 'Merino', 10.5], ['Cascade', '220', 220, 'Wool', 11], ['Malabrigo', 'Rios', 210, 'Superwash merino', 18], ['Malabrigo', 'Worsted', 210, 'Merino', 17],
+    ['Spincycle', 'Dream State', 150, 'Superwash American wool', 32], ['Knitting for Olive', 'Heavy Merino', 136, 'Merino', 10.5], ['Cascade', '220', 220, 'Wool', 11], ['Malabrigo', 'Rios', 210, 'Superwash merino', 18], ['Malabrigo', 'Worsted', 210, 'Merino', 17],
     ['Brooklyn Tweed', 'Shelter', 140, 'Wool', 14], ['Madelinetosh', 'Tosh Vintage', 200, 'Superwash merino', 28], ['Drops', 'Nepal', 82, 'Wool / alpaca', 4],
     ['Purl Soho', 'Worsted Twist', 164, 'Merino', 22], ['Plymouth', 'Encore', 200, 'Acrylic / wool', 7], ['Lion Brand', 'Wool-Ease', 197, 'Acrylic / wool', 6.5],
     ['Red Heart', 'Super Saver', 364, 'Acrylic', 5], ['Knit Picks', 'Wool of the Andes', 110, 'Wool', 4], ['Berroco', 'Vintage', 217, 'Acrylic / wool / nylon', 10],
@@ -53,6 +53,8 @@ const DEFAULT_PRICES = {
   '3 • Light / DK': [0.02, 0.05, 0.09], '4 • Medium / Worsted / Aran': [0.017, 0.05, 0.10], '5 • Bulky': [0.04, 0.08, 0.15],
   '6 • Super bulky': [0.07, 0.10, 0.20], '7 • Jumbo': [0.12, 0.18, 0.30], 'Unspecified': [0.02, 0.05, 0.09]
 };
+// Three catalog corrections above verified with manufacturers on 2026-10-29;
+// prices remain undated estimates. Other entries still require a label check.
 const TIERS = ['Budget (acrylic)', 'Mid (wool / blends)', 'Premium (indie, merino)'];
 
 function validPrices(p) {
@@ -64,15 +66,12 @@ function validPrices(p) {
 }
 const validYarn = y => y && typeof y.name === 'string' && y.name.length <= 80 && weights.includes(y.weight) && Number.isFinite(y.yards) && y.yards > 0 && y.yards < 10000;
 let prices = readStorage('bow-purl-prices', null);
-if (!validPrices(prices)) prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: 1, source: 'Built-in 2026 US Midwest estimates' };
-let myYarns = readStorage('bow-purl-yarns', []);
-if (!Array.isArray(myYarns)) myYarns = [];
-myYarns = myYarns.filter(validYarn).slice(0, 300);
-let stash = readStorage('bow-purl-stash', []);
-if (!Array.isArray(stash)) stash = [];
+if (!validPrices(prices)) { if(prices!==null)BPStore.flag('bow-purl-prices','Invalid saved prices were set aside.'); prices = { perYard: structuredClone(DEFAULT_PRICES), custom: [], tier: 1, source: 'Built-in 2026 US Midwest estimates' }; BPStore.stage('bow-purl-prices',prices); }
+let myYarns = BPStore.loadList('bow-purl-yarns',validYarn,300);
+let stash;
 function validStash(s) {
   const quantity = (v, max) => v == null || (Number.isFinite(v) && v >= 0 && v < max);
-  return !!s && typeof s.id === 'string' && s.id.length <= 100 && typeof s.brand === 'string' && s.brand.length <= 80 && weights.includes(s.weight) && quantity(s.yards, 10000) && quantity(s.skeins, 1000) && quantity(s.totalYards, 1000000) && (s.color === undefined || typeof s.color === 'string') && (s.ravId === undefined || Number.isInteger(s.ravId)) && (s.localQuantities === undefined || typeof s.localQuantities === 'boolean');
+  return !!s && typeof s.id === 'string' && s.id.length > 0 && s.id.length <= 100 && typeof s.brand === 'string' && s.brand.trim().length > 0 && s.brand.length <= 80 && weights.includes(s.weight) && quantity(s.yards, 10000) && quantity(s.skeins, 1000) && quantity(s.totalYards, 1000000) && optStr(s.color,60) && optStr(s.fiber,200) && optStr(s.dyeLot,80) && optStr(s.ravStatus,80) && quantity(s.priceUSD,1000) && (s.purchasedAt===undefined||s.purchasedAt===''||validPriceDate(s.purchasedAt)) && (s.ravId === undefined || Number.isInteger(s.ravId)) && (s.localQuantities === undefined || typeof s.localQuantities === 'boolean') && (s.localDetails === undefined || typeof s.localDetails === 'boolean');
 }
 function stashTotal(s) {
   if (s.skeins === 0) return 0;
@@ -80,24 +79,27 @@ function stashTotal(s) {
   return Number.isFinite(s.totalYards) ? s.totalYards : null;
 }
 function optionalQuantity(v, max) { if (v == null || String(v).trim() === '') return null; const n = Number(v); return Number.isFinite(n) && n >= 0 && n < max ? n : null; }
-stash = stash.filter(validStash).slice(0,500);
+stash = BPStore.loadList('bow-purl-stash',validStash,500);
 function mergeRavelryStash(current, incoming) {
   const next = structuredClone(current); let added = 0, updated = 0, skipped = 0, incomplete = 0;
   for (const r of incoming.slice(0,500)) {
-    if (!Number.isInteger(r.id) || typeof r.name !== 'string' || !r.name.trim()) { skipped++; continue; }
+    if (!r || !Number.isInteger(r.id) || typeof r.name !== 'string' || !r.name.trim()) { skipped++; continue; }
     const old = next.find(s => s.ravId === r.id);
     const yards = optionalQuantity(r.yards,10000) || null, skeins = optionalQuantity(r.skeins,1000), totalYards = optionalQuantity(r.totalYards,1000000);
     const item = { brand:r.name.slice(0,80), weight:ravW(r.weight), color:String(r.color || '').slice(0,60), ravId:r.id };
+    if(old?.localDetails)Object.assign(item,{brand:old.brand,weight:old.weight,color:old.color||''});
     // Explicit local corrections take precedence; empty upstream fields never erase known amounts.
     const amounts = old?.localQuantities ? { yards:old.yards, skeins:old.skeins, totalYards:old.totalYards ?? null } : { yards:yards ?? old?.yards ?? null, skeins:skeins ?? old?.skeins ?? null, totalYards:totalYards ?? old?.totalYards ?? null };
     Object.assign(item, amounts);
+    if(r.unavailable===true){item.ravStatus=String(r.status||'Unavailable').slice(0,80);if(!old?.localQuantities)Object.assign(item,{skeins:0,totalYards:0});}
+    else item.ravStatus='';
     if (item.yards == null || item.skeins == null) incomplete++;
     if (old) { Object.assign(old,item); updated++; }
     else { next.push({id:newId(), ...item}); added++; }
   }
   return {next,added,updated,skipped,incomplete};
 }
-const money = n => '$' + (n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(2));
+const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
 
 // ---------- helpers other screens use ----------
 function brandsFor(weight) { // yarns you've saved first, then the built-in list
@@ -125,7 +127,7 @@ const ravW = n => { const k = String(n).toLowerCase().replace(/\s*\(.*\)/, '').t
 
 // ---------- more widely sold yarns (big-box and craft-store staples; approximate) ----------
 const MORE_YARNS = {
-  '1 • Super fine / Fingering': [['Lion Brand', 'Truboo', 241, 'Rayon from bamboo', 7], ['Patons', 'Kroy Socks', 166, 'Wool / nylon', 6], ['Premier', 'Wool Free Sock', 462, 'Acrylic / nylon', 8], ['Scheepjes', 'Stone Washed', 142, 'Cotton / acrylic', 5]],
+  '1 • Super fine / Fingering': [['Patons', 'Kroy Socks', 166, 'Wool / nylon', 6], ['Premier', 'Wool Free Sock', 462, 'Acrylic / nylon', 8], ['Scheepjes', 'Stone Washed', 142, 'Cotton / acrylic', 5]],
   '2 • Fine / Sport': [['Lion Brand', 'Ice Cream', 503, 'Acrylic', 9], ['Scheepjes', 'Catona', 137, 'Cotton', 3.5], ['Patons', 'Astra', 133, 'Acrylic', 3]],
   '3 • Light / DK': [['Caron', 'Simply Soft Light', 330, 'Acrylic', 6], ['Lion Brand', 'Mandala', 590, 'Acrylic', 10], ['Bernat', 'Softee Baby', 362, 'Acrylic', 6],
     ['Loops & Threads', 'Snuggly Wuggly', 339, 'Acrylic / nylon', 6], ['Stylecraft', 'Special DK', 322, 'Acrylic', 4.5], ['Scheepjes', 'Colour Crafter', 328, 'Acrylic', 5], ['Cascade', '220 Superwash Merino', 220, 'Superwash merino', 12]],
@@ -188,7 +190,7 @@ function fillColors(name) {
 weights.forEach(w => { const o = document.createElement('option'); o.value = w; o.textContent = w; $('stashWeight').append(o); }); $('stashWeight').value = weights[4];
 function applyYarn(name) {
   const l = allLines().find(l => lc(l.name) === lc(name)); fillColors(name); if (!l) return;
-  if (weights.includes(l.weight)) $('stashWeight').value = l.weight; if (l.yards) $('stashYards').value = l.yards;
+  if (weights.includes(l.weight)) $('stashWeight').value = l.weight; if (l.yards) { $('stashYards').value = l.yards; $('stashUnit').value='yd'; } if(l.fiber)$('stashFiber').value=l.fiber;
   notify(`${l.name}: ${l.weight.replace(/^\d • /, '')}${l.yards ? `, ${l.yards} yds per skein` : ''}. Check your label.`);
 }
 $('stashBrand').addEventListener('change', () => applyYarn($('stashBrand').value));
@@ -196,58 +198,59 @@ $('yarnPick').onchange = () => { if (!$('yarnPick').value) return; $('stashBrand
 
 // ---------- import stash from Ravelry ----------
 $('stashImport').onclick = async () => {
-  const conf = readStorage('bow-purl-ravelry', {});
-  if (!conf.user || !/^https:\/\//i.test(conf.url || '')) { notify('Set up Ravelry first: Pattern library → Ravelry username and Connector settings.'); return; }
+  const conf = readStorage('bow-purl-ravelry', {}) || {};
+  if (!conf.user || !connectorURL(conf.url || '')) { notify('Set up Ravelry first: Pattern library → Ravelry username and Connector settings.'); return; }
   const btn = $('stashImport'); btn.disabled = true; btn.textContent = 'Importing…';
   let res = null, data = null;
   try {
-    try { res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'stash', username: conf.user }) }); data = await res.json().catch(() => ({})); }
+    try { ({res,data} = await connectorFetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'stash', username: conf.user }) })); }
     catch (e) { throw Error(connectorError(e, null, null, 'Stash import')); }
     if (!res.ok) throw Error(connectorError(null, res, data, 'Stash import'));
     if (!Array.isArray(data.stash)) throw Error('Stash import: your Ravelry connector is out of date (it answered with patterns instead of a stash). Paste the newest worker/ravelry-worker.js into Cloudflare and click Deploy.');
-    if (!data.stash.length) throw Error('Ravelry returned an empty stash. If you have yarn on Ravelry, set your stash to public (Ravelry → Settings → Privacy), or add yarns by hand.');
+    if (!data.stash.length) throw Error('Ravelry returned no stash entries. Check the username and connector access, or add yarn locally. Your existing stash was kept.');
     const { next, added, updated, skipped, incomplete } = mergeRavelryStash(stash, data.stash);
     if (saveStash(next)) { renderStash(); const message = `Ravelry stash: ${added} added, ${updated} updated. ${incomplete ? `${incomplete} entries need amount details; all were kept.` : 'Amount details are complete.'}${skipped ? ` ${skipped} invalid records skipped.` : ''}${data.truncated ? ' Only the first 300 were read.' : ''}${data.failedDetails ? ` ${data.failedDetails} details could not be read; try importing again.` : ''}`; $('stashImportResult').textContent = message; notify(message); }
-  } catch (err) { notify(err.message); } finally { btn.disabled = false; btn.textContent = '↻ Import stash from Ravelry'; }
+  } catch (err) { $('stashImportResult').textContent=err.message; notify(err.message); } finally { btn.disabled = false; btn.textContent = '↻ Import stash from Ravelry'; }
 };
 
 // ---------- Ravelry yarn search (uses the same connector as the pattern import) ----------
 $('yarnSearch').onclick = async () => {
-  const q = $('stashBrand').value.trim(), conf = readStorage('bow-purl-ravelry', {}), box = $('yarnResults');
+  const q = $('stashBrand').value.trim(), conf = readStorage('bow-purl-ravelry', {}) || {}, box = $('yarnResults');
   if (q.length < 2) { notify('Type a brand or yarn name first, e.g. Knitting for Olive.'); return; }
-  if (!/^https:\/\//i.test(conf.url || '')) { notify('Ravelry yarn search uses your Ravelry connector. Set it up in Pattern library → Connector settings.'); return; }
+  if (!connectorURL(conf.url || '')) { notify('Ravelry yarn search uses your Ravelry connector. Set it up in Pattern library → Connector settings.'); return; }
   const btn = $('yarnSearch'); btn.disabled = true; btn.textContent = 'Searching…'; box.replaceChildren();
   try {
-    const res = await fetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'yarns', query: q }) });
-    const data = await res.json().catch(() => ({}));
+    const {res,data} = await connectorFetch(conf.url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-App-Token': conf.token || '' }, body: JSON.stringify({ action: 'yarns', query: q }) });
     if (!res.ok) throw Error(data.error || (res.status === 400 ? 'Your Ravelry connector is out of date. Redeploy worker/ravelry-worker.js.' : `Yarn search failed (${res.status}).`));
-    const ys = (Array.isArray(data.yarns) ? data.yarns : []).filter(y => typeof y.name === 'string');
+    const ys = (Array.isArray(data.yarns) ? data.yarns : []).filter(y => typeof y?.name === 'string');
     if (!ys.length) { textNode('p', 'No yarns found on Ravelry. Try just the brand name.', box).className = 'hint'; return; }
     for (const y of ys.slice(0, 25)) {
       const w = ravW(y.weight), yd = Number(y.yards) > 0 && Number(y.yards) < 10000 ? Number(y.yards) : null;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'yarn-hit'; box.append(b);
       textNode('b', y.name.slice(0, 80), b); textNode('span', `${w.replace(/^\d • /, '')}${yd ? ` · ${yd} yds` : ''}${y.grams ? ` / ${y.grams} g` : ''}`, b);
       b.onclick = () => {
-        $('stashBrand').value = y.name.slice(0, 80); if (w !== 'Unspecified') $('stashWeight').value = w; if (yd) $('stashYards').value = yd;
-        if (yd && w !== 'Unspecified' && !myYarns.some(m => m.name.toLowerCase() === y.name.toLowerCase())) { myYarns = [{ name: y.name.slice(0, 80), weight: w, yards: yd }, ...myYarns].slice(0, 300); writeStorage('bow-purl-yarns', myYarns); fillBrandList(); }
+        $('stashBrand').value = y.name.slice(0, 80); if (w !== 'Unspecified') $('stashWeight').value = w; if (yd) { $('stashYards').value = yd; $('stashUnit').value='yd'; }
+        if (yd && w !== 'Unspecified' && !myYarns.some(m => m.name.toLowerCase() === y.name.toLowerCase())) { const nextYarns = [{ name: y.name.slice(0, 80), weight: w, yards: yd }, ...myYarns].slice(0, 300); if(writeStorage('bow-purl-yarns',nextYarns)){myYarns=nextYarns;fillBrandList();}else{box.replaceChildren();return;} }
         box.replaceChildren(); notify(`${y.name} filled in and saved to your yarn list.`);
       };
     }
-  } catch (err) { notify(err.message); } finally { btn.disabled = false; btn.textContent = '🔍 Ravelry'; }
+  } catch (err) { const message=err instanceof TypeError||err.name==='AbortError'?connectorError(err,null,null,'Yarn search'):err.message; textNode('p',message,box).className='warn'; notify(message); } finally { btn.disabled = false; btn.textContent = 'Search Ravelry'; }
 };
 
 // ---------- stash ----------
-function saveStash(next) { if (next.length > 500) { notify('This device can hold 500 stash entries. Export a backup before making room for more.'); return false; } if (writeStorage('bow-purl-stash', next)) { stash = next; fillBrandList(); return true; } return false; }
+function saveStash(next) { if (next.length > 500 || !next.every(validStash)) { notify('Check stash details (maximum 500 entries, 1,000 skeins and 10,000 yards per skein).'); return false; } if (writeStorage('bow-purl-stash', next)) { stash = next; fillBrandList(); return true; } return false; }
 $('stashForm').onsubmit = e => {
   e.preventDefault();
-  const brand = $('stashBrand').value.trim().slice(0, 80), yards = optionalQuantity($('stashYards').value,10000), skeins = optionalQuantity($('stashSkeins').value,1000);
+  const brand = $('stashBrand').value.trim().slice(0, 80), rawYards = optionalQuantity($('stashYards').value,10000), yards=rawYards===null?null:rawYards*($('stashUnit').value==='m'?YD_PER_M:1), skeins = optionalQuantity($('stashSkeins').value,1000);
   if (!brand) { notify('Enter the yarn brand and name.'); return; }
-  const item = { id: newId(), brand, weight: $('stashWeight').value, yards, skeins, color: $('stashColor').value.trim().slice(0, 60) };
+  if (($('stashYards').value.trim()!==''&&rawYards===null)||($('stashSkeins').value.trim()!==''&&skeins===null)) {notify('Enter valid amounts, or leave them blank if unknown.');return;}
+  const item = { id: newId(), brand, weight: $('stashWeight').value, yards, skeins, color: $('stashColor').value.trim().slice(0, 60), fiber:$('stashFiber').value.trim(),dyeLot:$('stashLot').value.trim(),priceUSD:$('stashPrice').value.trim()===''?null:Number($('stashPrice').value),purchasedAt:$('stashPurchased').value };
   if (saveStash([...stash, item])) { $('stashForm').reset(); $('stashWeight').value = item.weight; renderStash(); notify('Added to your stash.'); }
 };
 let editingStashId = null;
 function editStashAmounts(s) {
   editingStashId = s.id; $('stashEditTitle').textContent = s.brand;
+  $('editStashBrand').value=s.brand;$('editStashWeight').value=s.weight;$('editStashColor').value=s.color||'';$('editStashFiber').value=s.fiber||'';$('editStashLot').value=s.dyeLot||'';$('editStashPrice').value=s.priceUSD??'';$('editStashPurchased').value=s.purchasedAt||'';
   $('editStashYards').value = s.yards ?? ''; $('editStashSkeins').value = s.skeins ?? ''; $('editStashTotal').value = s.totalYards ?? '';
   $('stashEditDialog').showModal();
 }
@@ -255,19 +258,30 @@ $('cancelStashEdit').onclick = () => $('stashEditDialog').close();
 $('stashEditForm').onsubmit = e => {
   e.preventDefault(); const next = structuredClone(stash), item = next.find(s => s.id === editingStashId); if (!item) return;
   const yards = optionalQuantity($('editStashYards').value,10000), skeins = optionalQuantity($('editStashSkeins').value,1000), total = optionalQuantity($('editStashTotal').value,1000000);
-  Object.assign(item, {yards,skeins,totalYards:yards > 0 && skeins != null ? null : total,localQuantities:true});
+  for(const [id,amount]of [['editStashYards',yards],['editStashSkeins',skeins],['editStashTotal',total]])if($(id).value.trim()!==''&&amount===null){notify('Enter valid amounts, or leave them blank if unknown.');return;}
+  const quantitiesChanged=yards!==item.yards||skeins!==item.skeins||total!==(item.totalYards??null);
+  Object.assign(item, {brand:$('editStashBrand').value.trim(),weight:$('editStashWeight').value,color:$('editStashColor').value.trim(),fiber:$('editStashFiber').value.trim(),dyeLot:$('editStashLot').value.trim(),priceUSD:$('editStashPrice').value.trim()===''?null:Number($('editStashPrice').value),purchasedAt:$('editStashPurchased').value,yards,skeins,totalYards:yards > 0 && skeins != null ? null : total,localQuantities:item.localQuantities||quantitiesChanged});
+  if(item.ravId)item.localDetails=true;
   if (saveStash(next)) { $('stashEditDialog').close(); renderStash(); notify('Amounts saved on this device. Re-importing keeps your corrections.'); }
 };
 function adjustStash(s, amount) {
-  if (s.skeins == null) return;
+  if (s.skeins == null || !(s.yards>0) || s.skeins+amount>=1000) return;
   const next = structuredClone(stash), item = next.find(n => n.id === s.id);
   item.skeins = Math.max(0, +(item.skeins + amount).toFixed(2)); item.totalYards = null; item.localQuantities = true;
   if (saveStash(next)) renderStash();
 }
+let stashVisibleLimit=60;
+weights.forEach(w=>{for(const id of ['stashWeightFilter','editStashWeight']){const o=document.createElement('option');o.value=w;o.textContent=w;$(id).append(o);}});
+for(const id of ['stashSearch','stashWeightFilter','stashSort'])$(id).addEventListener('input',()=>{stashVisibleLimit=60;renderStash();});
+$('stashMore').onclick=()=>{stashVisibleLimit+=60;renderStash();};
 function renderStash() {
   const list = $('stashList'), out = $('stashMatches'); list.replaceChildren(); out.replaceChildren();
-  if (!stash.length) { textNode('p', 'Your stash is empty. Add a yarn above to see what you can make.', list); return; }
-  for (const s of stash) {
+  const q=$('stashSearch').value.trim().toLowerCase(),w=$('stashWeightFilter').value;
+  const visible=stash.filter(s=>(w==='all'||s.weight===w)&&(!q||[s.brand,s.color||'',s.fiber||'',s.dyeLot||''].join(' ').toLowerCase().includes(q)));
+  const sort=$('stashSort').value;visible.sort(sort==='yards'?(a,b)=>(stashTotal(b)??-1)-(stashTotal(a)??-1):sort==='unknown'?(a,b)=>(stashTotal(a)!==null)-(stashTotal(b)!==null)||a.brand.localeCompare(b.brand):(a,b)=>a.brand.localeCompare(b.brand));
+  $('stashCount').textContent=visible.length+' of '+stash.length+' yarn entries';$('stashMore').hidden=visible.length<=stashVisibleLimit;
+  if (!visible.length) { textNode('p', stash.length?'No yarn matches these filters.':'Your stash is empty. Add a yarn above to see what you can make.', list); return; }
+  for (const s of visible.slice(0,stashVisibleLimit)) {
     const row = document.createElement('div'); row.className = 'stash-item'; list.append(row);
     const b = document.createElement('div'); row.append(b);
     textNode('b', s.brand + (s.color ? ' · ' + s.color : '') + (s.ravId ? ' ↻' : ''), b);
@@ -275,35 +289,42 @@ function renderStash() {
     textNode('span', `${s.weight.replace(/^\d • /, '')} · ${s.skeins == null ? 'Skeins unknown' : s.skeins + ' skeins'} · ${s.yards == null ? 'Yards per skein unknown' : s.yards + ' yds/skein'}${total == null ? ' · Total unknown' : ' · ' + fmt(total) + ' yds total'}`, b).className = 'muted';
     if (s.yards == null || s.skeins == null) textNode('span', 'Kept in your stash — add amounts whenever you know them.', b).className = 'hint';
     if (s.localQuantities && s.ravId) textNode('span', 'Your local amounts are kept on re-import.', b).className = 'hint';
+    if(s.ravStatus)textNode('span','Ravelry status: '+s.ravStatus+(s.localQuantities?' — check your locally recorded amounts.':''),b).className='warn';
+    if(s.fiber||s.dyeLot)textNode('span',[s.fiber,s.dyeLot?'Dye lot: '+s.dyeLot:''].filter(Boolean).join(' · '),b).className='muted';
+    if(s.priceUSD!=null)textNode('span','Recorded purchase: '+money(s.priceUSD)+' per skein'+(s.purchasedAt?' · '+priceDateText(s.purchasedAt):' (undated)'),b).className='hint';
     const act = document.createElement('div'); act.className = 'actions'; row.append(act);
-    textNode('button', 'Edit amounts', act).onclick = () => editStashAmounts(s);
+    textNode('button', 'Edit details', act).onclick = () => editStashAmounts(s);
     const minus = textNode('button', '−', act), plus = textNode('button', '+', act);
     minus.setAttribute('aria-label', 'Use one skein of ' + s.brand); plus.setAttribute('aria-label', 'Add one skein of ' + s.brand);
-    minus.disabled = s.skeins == null || s.skeins <= 0; plus.disabled = s.skeins == null;
+    minus.disabled = s.skeins == null || s.skeins <= 0 || !(s.yards>0); plus.disabled = s.skeins == null || !(s.yards>0) || s.skeins+1>=1000;
+    if(s.skeins!=null&&!(s.yards>0))textNode('span','Use Edit details to adjust totals while per-skein yardage is unknown.',b).className='hint';
     minus.onclick = () => adjustStash(s,-1); plus.onclick = () => adjustStash(s,1);
     textNode('button', 'Remove', act).onclick = () => { if (confirm(`Remove ${s.brand} from your stash?`)) { saveStash(stash.filter(x => x.id !== s.id)); renderStash(); } };
   }
   // suggestions: one yarn on its own, or all yarns of a weight combined (colorwork, stripes)
   const combine = $('stashCombine').checked;
-  const known = stash.filter(s => stashTotal(s) != null);
-  const unknown = stash.length - known.length;
+  const known = visible.filter(s => stashTotal(s) != null);
+  const unknown = visible.length - known.length;
   if (unknown) textNode('p', `${unknown} yarn entries have unknown total yardage. They stay in your stash; add amounts to include them in project estimates.`, out).className = 'hint';
   const groups = combine ? weights.map(w => ({ label: `Known amounts of your ${w.replace(/^\d • /, '')}`, weight: w, total: known.filter(s => s.weight === w).reduce((t,s) => t + stashTotal(s),0) })).filter(g => g.total > 0)
-    : known.map(s => ({ label:s.brand + (s.color ? ' · ' + s.color : ''), weight:s.weight, total:stashTotal(s), per:s.yards }));
+    : known.filter(s=>stashTotal(s)>0).map(s => ({ label:s.brand + (s.color ? ' · ' + s.color : ''), weight:s.weight, total:stashTotal(s), per:s.yards }));
+  textNode('p','Yardage suggestions only: check your chosen size, fiber, gauge, colors and dye lots. Combined weights do not establish yarn compatibility. These estimates do not reserve yarn for other projects.',out).className='hint';
+  if(groups.length>12)textNode('p','Showing suggestions for the first 12 yarn entries. Narrow your stash filters to see others.',out).className='hint';
   let any = false;
-  for (const g of groups) {
+  for (const g of groups.slice(0,12)) {
     const fits = patterns.filter(p => p.weight === g.weight && (p.yardsMin ?? p.yardsMax) != null && (p.yardsMin ?? p.yardsMax) <= g.total)
       .sort((a, b) => (b.yardsMin ?? b.yardsMax) - (a.yardsMin ?? a.yardsMax));
     const sec = document.createElement('section'); sec.className = 'panel'; out.append(sec);
     textNode('h3', `${g.label} — ${fmt(g.total)} yds`, sec);
     if (!fits.length) { textNode('p', `No patterns in your library fit ${fmt(g.total)} yds of ${g.weight.replace(/^\d • /, '')} yet.`, sec).className = 'muted'; continue; }
     any = true;
-    for (const p of fits) {
+    for (const p of fits.slice(0,20)) {
       const lo = p.yardsMin ?? p.yardsMax, hi = p.yardsMax ?? lo, all = hi <= g.total;
       const r = document.createElement('div'); r.className = 'stash-match'; sec.append(r);
       const h = p.link ? textNode('a', p.name, r) : textNode('b', p.name, r); if (p.link) { h.href = p.link; h.target = '_blank'; h.rel = 'noopener noreferrer'; }
-      textNode('span', `${lo === hi ? fmt(lo) : fmt(lo) + '–' + fmt(hi)} yds · ${all ? 'every size fits' : 'smaller sizes fit'} · ${fmt(g.total - lo)} yds left over at smallest size`, r).className = all ? 'ok' : 'warn';
+      textNode('span', `${lo === hi ? fmt(lo) : fmt(lo) + '–' + fmt(hi)} yds · ${all ? 'covers the listed yardage range' : 'covers only the lower yardage estimates'} · ${fmt(g.total - lo)} yds beyond the minimum`, r).className = all ? 'ok' : 'warn';
     }
+    if(fits.length>20)textNode('p',(fits.length-20)+' more matches. Filter your Pattern library to compare them.',sec).className='hint';
   }
   if (!any && !patterns.length) textNode('p', 'Import or add patterns in the Pattern library first, then come back here.', out).className = 'hint';
 }
@@ -368,7 +389,7 @@ function parsePriceCSV(text) {
   if (quoted) throw Error('A quoted CSV cell is not closed.');
   row.push(cell.trim());if(row.some(Boolean))rows.push(row);return rows;
 }
-function encodePriceCSV(rows) { return rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'); }
+function encodePriceCSV(rows) { return rows.map(row=>row.map(v=>{let s=String(v??'');if(typeof v==='string'&&/^(?:\s*[=+\-@]|[\t\r])/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}).join(',')).join('\r\n'); }
 function priceCSVRows(p) {
   const rows=[['type','name','price','yards','weight','tier','source','checked']];
   for (const w of weights) for (let tier=0;tier<3;tier++) {

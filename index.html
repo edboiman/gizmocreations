@@ -6,22 +6,36 @@
 <title>Bow & Purl • Knitting studio</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="images/studio-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=3.1">
-<script src="motifs.js?v=3.1" defer></script>
-<script src="llm.js?v=3.1" defer></script>
-<script src="app.js?v=3.1" defer></script><script src="yarns.js?v=3.1" defer></script>
-<script src="seasonal.js?v=3.1" defer></script>
-<script src="cats.js?v=3.1" defer></script>
-<script src="offline.js?v=3.1" defer></script>
-<body>
-<header><span class="logo" aria-hidden="true">🧶</span><div><b>Bow & Purl</b><small>Your little knitting studio</small></div><span class="badge">Made stitch by stitch</span></header>
+<link rel="stylesheet" href="style.css?v=3.2">
+<script src="data.js?v=3.2" defer></script>
+<script src="motifs.js?v=3.2" defer></script>
+<script src="llm.js?v=3.2" defer></script>
+<script src="app.js?v=3.2" defer></script><script src="yarns.js?v=3.2" defer></script>
+<script src="seasonal.js?v=3.2" defer></script>
+<script src="projects.js?v=3.2" defer></script>
+<script src="backup.js?v=3.2" defer></script>
+<script src="cats.js?v=3.2" defer></script>
+<script src="offline.js?v=3.2" defer></script>
+<body data-section="studio">
+<a class="skip-link" id="skipNavigation" href="#studioNavigation">Skip to studio navigation</a>
+<header><span class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" width="36" height="36"><circle cx="23" cy="26" r="17" fill="#e8acbf" stroke="#a33e62" stroke-width="2"/><path d="M12 14Q30 22 35 35M7 26Q21 24 31 40M23 9Q12 29 18 42M34 13Q16 18 8 33M39 39Q48 40 45 46" fill="none" stroke="#fff9f6" stroke-width="2"/><path d="M10 4L33 30M29 3L13 33" stroke="#735763" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>Bow & Purl</b><small>Your little knitting studio</small></div><span class="badge">Made stitch by stitch</span></header>
 <main>
+<div class="app-safety"><span id="saveHealth" role="status">Data saves on this browser</span><button type="button" id="quickBackup">Export backup</button></div>
+<aside class="storage-notice" id="storageNotice" role="alert" hidden><p id="storageMessage"></p><button type="button" id="downloadRecovery">Download recovery file</button><button type="button" id="dismissRecovery">Hide recovery reminder (originals kept)</button></aside>
+<aside class="update-notice" id="updateNotice" role="status" hidden></aside>
 <section class="hero">
   <div><span class="eyebrow">A LITTLE YARN. A LITTLE MAGIC.</span><h1>Dream it.<br>Knit it.</h1><p>A cozy place for colorwork ideas and patterns worth keeping. Supervised by the studio cats.</p></div>
-  <div class="hero-photos"><img src="images/cats-tree.jpg?v=3.1" alt="Two Siamese cats on a cat tree"><img src="images/cat-portrait.jpg?v=3.1" alt="A fluffy Siamese cat looking up"></div>
+  <div class="hero-photos"><img src="images/cats-tree.jpg?v=3.2" alt="Two Siamese cats on a cat tree"><img src="images/cat-portrait.jpg?v=3.2" alt="A fluffy Siamese cat looking up"></div>
 </section>
 <aside class="studio-companion" aria-label="Studio cat"><div class="cat-scene" data-cat="play"></div><div class="companion-copy"><b>A little company for your stitches</b><p>Tap the cat for a little love.</p></div><button type="button" id="catMotion" aria-pressed="false">Pause cats</button></aside>
-<nav aria-label="Studio sections"><button data-tab="studio" class="active" aria-current="page"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Chart studio</button><button data-tab="monthly"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Monthly ideas</button><button data-tab="shop"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Yarn shop</button><button data-tab="stash"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>My stash</button><button data-tab="library"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Pattern library</button><button data-tab="prices"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Prices</button><button data-tab="help"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Getting started</button></nav>
+<nav id="studioNavigation" aria-label="Studio sections"><button data-tab="projects"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>My projects</button><button data-tab="studio" class="active" aria-current="page"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Chart studio</button><button data-tab="monthly"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Monthly ideas</button><button data-tab="shop"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Yarn shop</button><button data-tab="stash"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>My stash</button><button data-tab="library"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Pattern library</button><button data-tab="prices"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Prices</button><button data-tab="help"><svg class="tab-heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21S2 14.5 2 7.7C2 2.5 8.3 1 12 5.5C15.7 1 22 2.5 22 7.7C22 14.5 12 21 12 21Z"/></svg>Getting started</button></nav>
+<div class="mobile-nav"><label for="sectionPicker">Studio section</label><select id="sectionPicker"><option value="projects">My projects</option><option value="studio" selected>Chart studio</option><option value="monthly">Monthly ideas</option><option value="shop">Yarn shop</option><option value="stash">My stash</option><option value="library">Pattern library</option><option value="prices">Prices</option><option value="help">Getting started</option></select></div>
+<section id="projects" hidden>
+  <div class="section-title"><div><span class="eyebrow">PICK UP WHERE YOU LEFT OFF</span><h2>On my needles</h2></div><button type="button" class="primary" id="newProject">Start a project</button></div>
+  <div class="panel project-filters"><label>Find a project<input id="projectSearch" type="search" placeholder="Name, section or notes"></label><label>Show<select id="projectFilter"><option value="active">On the needles</option><option value="paused">Paused</option><option value="complete">Finished</option><option value="all">All projects</option></select></label><button type="button" id="keepAwake" aria-pressed="false">Keep screen awake</button></div>
+  <p class="hint">Counters record completed rows; repeat position shows the next row to work. Linked charts keep their own current-row marker. Yarn links are references: they do not reserve or deduct stash amounts.</p>
+  <p id="projectCount" class="hint" role="status"></p><p id="projectAnnouncement" class="sr-only" role="status" aria-live="polite"></p><div id="projectList" class="project-list"></div>
+</section>
 
 <section id="monthly" hidden>
   <div class="section-title"><div><span class="eyebrow">A YEAR OF LITTLE POSSIBILITIES</span><h2>What shall we knit this month?</h2></div><span class="pill">48 built-in project ideas</span></div>
@@ -40,7 +54,7 @@
 </section>
 
 <section id="studio">
-  <figure class="kitten-banner"><img class="kitten" src="images/cats-bed.jpg?v=3.1" alt="Two Siamese cats on a floral quilt"><figcaption>Studio supervisors on duty</figcaption></figure>
+  <figure class="kitten-banner"><img class="kitten" src="images/cats-bed.jpg?v=3.2" alt="Two Siamese cats on a floral quilt"><figcaption>Studio supervisors on duty</figcaption></figure>
   <div class="section-title"><div><span class="eyebrow">MAKE SOMETHING SWEET</span><h2>Your next colorwork chart</h2></div><span class="pill">One square = one stitch</span></div>
   <div class="workspace">
     <form id="generator" class="panel">
@@ -48,9 +62,9 @@
       <label>Chart name<input id="chartName" maxlength="100" value="My heart cardigan"></label>
       <div class="pair"><label>Columns / stitches<input id="cols" type="number" min="8" max="120" value="32" required></label><label>Rows<input id="rows" type="number" min="8" max="160" value="32" required></label></div>
       <label>Motif <span class="hint inline" id="motifCount"></span><select id="motif"></select></label>
-      <div class="actions"><button class="primary" type="submit">✦ Generate chart</button><button type="button" id="surprise">🎲 Surprise me</button><button type="button" id="deleteMotif" hidden>Delete my motif</button></div>
+      <div class="actions"><button class="primary" type="submit">✦ Generate chart</button><button type="button" id="surprise">Surprise me</button><button type="button" id="deleteMotif" hidden>Delete my motif</button></div>
 
-      <details class="sub" open><summary>Knit controls</summary>
+      <details class="sub"><summary>Knit controls</summary>
         <label>Layout<select id="layout"><option value="repeat">Repeating grid</option><option value="halfdrop">Half-drop repeat</option><option value="brick">Brick repeat</option><option value="band">Single band (yoke / hem)</option><option value="single">One centered motif</option></select></label>
         <div class="pair three"><label>Scale<select id="scale"><option value="0">Auto</option><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></label><label>Gap across<input id="gapX" type="number" min="0" max="20" value="3"></label><label>Gap down<input id="gapY" type="number" min="0" max="20" value="3"></label></div>
         <div class="checks"><label class="check"><input id="mirror" type="checkbox"> Mirror</label><label class="check"><input id="flip" type="checkbox"> Flip</label><label class="check"><input id="invert" type="checkbox"> Swap colors</label><label class="check"><input id="noAccent" type="checkbox"> Two colors only</label><label class="check"><input id="border" type="checkbox"> Peerie border</label></div>
@@ -74,41 +88,49 @@
 
       <details class="sub" id="gridDetails"><summary>Type your own grid</summary>
         <p class="hint">One line per row, top row first. 0 or . = background, 1 or # = motif, 2 or @ = accent. Uses the layout and scale above.</p>
-        <textarea id="gridText" rows="7" spellcheck="false" class="mono" placeholder="0011100&#10;0111110&#10;1121211&#10;1111111"></textarea>
+        <label for="gridText">Chart rows</label><textarea id="gridText" rows="7" spellcheck="false" class="mono" placeholder="0011100&#10;0111110&#10;1121211&#10;1111111"></textarea>
         <div class="actions"><button type="button" id="applyGrid">Place grid</button><button type="button" id="exportGrid">Copy chart into box</button></div><p class="hint">Made something you love? Save it as a motif and it joins the dropdown under ♡ My motifs. My motifs stay on this device and are included in library backups.</p>
       </details>
 
       <details class="sub"><summary>✦ Design with AI (optional)</summary>
-        <p class="hint">Describe anything — "a fox drinking tea on the moon". Needs your own connector (see README). Your API key lives on the connector, never in this page.</p>
-        <textarea id="aiPrompt" rows="2" maxlength="400" placeholder="A sleepy owl on a branch"></textarea>
+        <p class="hint">Describe anything — "a fox drinking tea on the moon". Needs your own connector (see README). AI fills your selected rows and columns; motif layout and scale do not apply. Your AI provider may charge for generation. Your API key lives on the connector, never in this page.</p>
+        <label for="aiPrompt">Design description</label><textarea id="aiPrompt" rows="2" maxlength="400" placeholder="A sleepy owl on a branch"></textarea>
         <button type="button" class="primary" id="aiGo">✦ Design with AI</button>
         <details class="sub"><summary>AI settings</summary>
           <label>Connector URL<input id="aiEndpoint" type="url" placeholder="https://bow-purl-ai.yourname.workers.dev"></label>
-          <label>App token (optional)<input id="aiToken" autocomplete="off"></label>
+          <label>App token (required)<input id="aiToken" type="password" maxlength="512" autocomplete="off"></label>
           <button type="button" id="saveAi">Save settings</button>
         </details>
       </details>
     </form>
 
     <div class="panel editor">
-      <div class="editor-top"><div><h3 id="chartTitle">My heart cardigan</h3><p id="dimensions"></p></div><button id="undo" type="button">↶ Undo</button></div>
+      <div class="editor-top"><div><h3 id="chartTitle">My heart cardigan</h3><p id="dimensions"></p></div><div class="actions"><button id="undo" type="button">↶ Undo</button><button id="redo" type="button" disabled>↷ Redo</button></div></div>
       <div class="toolbar">
+        <label>Chart mode<select id="chartMode"><option value="edit">Edit chart</option><option value="knit">Knit (locked)</option></select></label>
+        <label>Working<select id="chartDirection"><option value="round">In rounds</option><option value="flat">Flat</option></select></label>
+        <label>Zoom<select id="chartZoom"><option value="0.75">75%</option><option value="1" selected>100%</option><option value="1.5">150%</option><option value="2">200%</option></select></label>
+        <label class="check"><input id="chartSymbols" type="checkbox"> Show color symbols</label>
         <label>Paint with<select id="paint"><option value="1">Motif color</option><option value="2">Accent color</option><option value="0">Background / erase</option></select></label>
         <label>Brush<select id="brush"><option value="1">1 stitch</option><option value="2">2×2</option><option value="3">3×3</option></select></label>
         <label class="check"><input id="knitShape" type="checkbox"> Knit proportions</label>
         <label class="check"><input id="gridTen" type="checkbox" checked> 10-stitch guides</label>
       </div>
-      <div class="chart-scroll"><canvas id="chart" tabindex="0" aria-label="Editable knitting chart; tap a square to change its color"></canvas></div>
+      <div class="progress"><b>Keep your place</b><div class="actions"><button id="prevRow" aria-label="Previous row">−</button><span id="rowCount" role="status" aria-live="polite"></span><button id="nextRow" aria-label="Next row">+</button><button id="resetRow">Reset</button></div></div>
+      <div class="chart-scroll" id="chartViewport"><canvas id="chart" tabindex="0" aria-describedby="chartModeHelp chartPosition" aria-label="Editable colorwork chart"></canvas></div>
+      <p class="hint" id="chartModeHelp"></p><p id="chartPosition" class="sr-only" role="status"></p>
+      <p class="hint" id="chartLegend"></p><details class="sub row-reading"><summary>Read the current row as text</summary><p id="rowInstructions" role="status"></p></details>
+      <button type="button" id="chartSettings">Chart name, size & motif settings</button>
       <p class="hint">Tap or drag to paint. Row 1 is at the bottom; your current row is outlined in purple. Flat: odd rows right to left, even rows left to right. In the round: all rows right to left.</p>
       <div class="floats"><span id="floatInfo"></span><label class="inline-label">Max float<select id="floatMax"><option>5</option><option selected>7</option><option>9</option></select></label></div>
       <div class="actions"><button id="saveChart" class="primary">♡ Save pattern</button><button id="png">Download PNG</button><button id="print">Print / PDF</button><button id="mirrorChart">⇋ Mirror</button><button id="invertChart">◐ Swap</button><button id="clearChart">Clear</button><button id="saveMotif">♡ Save as my motif</button></div>
-      <div class="progress"><b>Keep your place</b><div class="actions"><button id="prevRow" aria-label="Previous row">−</button><span id="rowCount"></span><button id="nextRow" aria-label="Next row">+</button><button id="resetRow">Reset</button></div></div>
+
     </div>
   </div>
 </section>
 
 <section id="shop" hidden>
-  <figure class="kitten-banner"><img class="kitten" src="images/cat-peek.jpg?v=3.1" alt="A Siamese cat peeking over a quilt"><figcaption>Shopping buddy</figcaption></figure>
+  <figure class="kitten-banner"><img class="kitten" src="images/cat-peek.jpg?v=3.2" alt="A Siamese cat peeking over a quilt"><figcaption>Shopping buddy</figcaption></figure>
   <div class="section-title"><div><span class="eyebrow">FOUND A YARN YOU LOVE?</span><h2>What can I make with it?</h2></div></div>
   <div class="panel shop-form">
     <label>Yarn weight (on the label)<select id="shopWeight"></select></label>
@@ -121,17 +143,19 @@
   <div id="shopResults"></div>
 </section>
 <section id="stash" hidden>
-  <figure class="kitten-banner"><img class="kitten" src="images/cat-portrait.jpg?v=3.1" alt="A fluffy Siamese cat looking up"><figcaption>Stash inspector</figcaption></figure>
+  <figure class="kitten-banner"><img class="kitten" src="images/cat-portrait.jpg?v=3.2" alt="A fluffy Siamese cat looking up"><figcaption>Stash inspector</figcaption></figure>
   <div class="section-title"><div><span class="eyebrow">USE WHAT YOU HAVE</span><h2>My yarn stash</h2></div></div>
   <div class="panel"><button type="button" class="primary" id="stashImport">↻ Import stash from Ravelry</button><p class="hint">Uses your Ravelry username and connector from the Pattern library tab. Re-importing updates those yarns; yarns you add by hand are kept. Missing amounts import as unknown; use Edit amounts to fill them in here.</p></div>
   <p id="stashImportResult" class="hint" role="status"></p>
   <form id="stashForm" class="panel">
-    <label>Yarn<select id="yarnPick"></select></label><label>Brand & yarn<span class="search-row"><input id="stashBrand" list="brandList" maxlength="80" placeholder="e.g. Knitting for Olive Merino" autocomplete="off"><button type="button" id="yarnSearch">🔍 Ravelry</button></span></label><div id="yarnResults"></div><datalist id="brandList"></datalist>
+    <label>Yarn<select id="yarnPick"></select></label><label>Brand & yarn<span class="search-row"><input id="stashBrand" list="brandList" maxlength="80" placeholder="e.g. Knitting for Olive Merino" autocomplete="off"><button type="button" id="yarnSearch">Search Ravelry</button></span></label><div id="yarnResults"></div><datalist id="brandList"></datalist>
     <div class="pair"><label>Weight<select id="stashWeight"></select></label><label>Color (optional)<input id="stashColor" maxlength="60" list="colorList" placeholder="Dusty Rose" autocomplete="off"><datalist id="colorList"></datalist></label></div>
-    <div class="pair"><label>Yards per skein (optional)<input id="stashYards" type="number" inputmode="decimal" min="1" placeholder="220"></label><label>Skeins (optional)<input id="stashSkeins" type="number" inputmode="decimal" min="0.25" step="0.25" placeholder="3"></label></div>
+    <div class="pair"><label>Length per skein (optional)<input id="stashYards" type="number" inputmode="decimal" min="0.01" max="9000" step="any" placeholder="220"></label><label>Length unit<select id="stashUnit"><option value="yd">Yards</option><option value="m">Meters</option></select></label></div><label>Skeins (optional)<input id="stashSkeins" type="number" inputmode="decimal" min="0" max="999" step="any" placeholder="3"></label>
+    <details class="sub"><summary>Fiber, dye lot & purchase details</summary><label>Fiber composition<input id="stashFiber" maxlength="200" placeholder="e.g. 80% wool, 20% nylon"></label><label>Dye lot<input id="stashLot" maxlength="80"></label><div class="pair"><label>Paid per skein (USD)<input id="stashPrice" type="number" inputmode="decimal" min="0" max="999.99" step="0.01"></label><label>Purchase date<input id="stashPurchased" type="date"></label></div><p class="hint">Purchase prices are your historical records, separate from current shop quotes.</p></details>
     <button class="primary">+ Add to stash</button><p class="hint">Yarns in your stash and in your patterns are listed first. Type any yarn, or search Ravelry's database for any brand. Choosing a result fills in weight and yardage and remembers that yarn. Half skeins are fine (0.5). Leave amounts blank if unknown.</p>
   </form>
-  <div id="stashList" class="panel"></div>
+  <div class="panel filters stash-filters"><label>Search stash<input id="stashSearch" type="search" placeholder="Yarn, color, fiber or dye lot"></label><label>Weight<select id="stashWeightFilter"><option value="all">All weights</option></select></label><label>Sort<select id="stashSort"><option value="name">Yarn name</option><option value="yards">Most yarn first</option><option value="unknown">Unknown amounts first</option></select></label></div><p id="stashCount" class="hint" role="status"></p>
+  <div id="stashList" class="panel"></div><button type="button" id="stashMore" hidden>Show more yarn</button>
   <div class="section-title"><div><span class="eyebrow">FROM YOUR LIBRARY</span><h2>What you can make</h2></div><label class="check"><input id="stashCombine" type="checkbox"> Combine yarns of the same weight</label></div>
   <div id="stashMatches"></div>
 </section>
@@ -166,31 +190,39 @@
   </div>
 </section>
 <section id="library" hidden>
-  <figure class="kitten-banner"><img class="kitten" src="images/cat-nap.jpg?v=3.1" alt="A Siamese cat napping on a quilt"><figcaption>Guarding your patterns</figcaption></figure>
+  <figure class="kitten-banner"><img class="kitten" src="images/cat-nap.jpg?v=3.2" alt="A Siamese cat napping on a quilt"><figcaption>Guarding your patterns</figcaption></figure>
   <div class="section-title"><div><span class="eyebrow">A HOME FOR YOUR IDEAS</span><h2>Pattern library</h2></div></div>
   <div class="panel ravelry"><h3>♡ Your Ravelry patterns</h3><p class="hint">Import the patterns you've favorited and the patterns in your Ravelry library. They're sorted into yarn weights with the yardage each one needs.</p>
     <div class="actions"><label class="grow">Ravelry username<input id="ravUser" autocomplete="username" placeholder="yourname"></label><label>Import<select id="ravInclude"><option value="both">Favorites + library</option><option value="favorites">Favorites only</option><option value="library">Library only</option></select></label><button type="button" class="primary" id="ravSync">↻ Import from Ravelry</button></div>
-    <details class="sub" id="ravSettings"><summary>Connector settings</summary><p class="hint">Ravelry needs a small connector that holds your Ravelry API credentials (setup in the README, about 10 minutes, free).</p><label>Connector URL<input id="ravUrl" type="url" placeholder="https://bow-purl-ravelry.yourname.workers.dev"></label><label>App token<input id="ravToken" autocomplete="off"></label></details></div>
-  <div class="panel" id="summaryWrap" hidden><h3>Yarn at a glance</h3><div class="table-scroll"><table class="summary"><thead><tr><th>Yarn weight</th><th>Patterns</th><th>Yards for all</th><th>Avg per pattern</th></tr></thead><tbody id="weightSummary"></tbody></table></div><p class="hint">Ranges cover the smallest to largest size. Check the pattern for your size and add 10–15% for swatching.</p></div>
+    <details class="sub" id="ravSettings"><summary>Connector settings</summary><p class="hint">Ravelry needs a small connector that holds your Ravelry API credentials (setup in the README, about 10 minutes, free).</p><label>Connector URL<input id="ravUrl" type="url" placeholder="https://bow-purl-ravelry.yourname.workers.dev"></label><label>App token<input id="ravToken" type="password" maxlength="512" autocomplete="off"></label></details></div>
+  <p id="ravImportResult" class="hint" role="status"></p>
+  <details class="panel" id="summaryWrap" hidden><summary>Yardage overview by weight</summary><div class="table-scroll"><table class="summary"><thead><tr><th>Yarn weight</th><th>Patterns</th><th>Yards for all</th><th>Avg per pattern</th></tr></thead><tbody id="weightSummary"></tbody></table></div><p class="hint">Ranges cover the smallest to largest size. Check the pattern for your size and add 10–15% for swatching.</p></details>
   <div class="panel"><div class="actions filters"><label>Yarn weight<select id="filter"></select></label><label>Source<select id="sourceFilter"><option value="all">Everything</option><option value="ravelry">All Ravelry</option><option value="favorite">Ravelry favorites</option><option value="library">Ravelry library</option><option value="mine">My charts & patterns</option></select></label><label>Sort<select id="sortBy"><option value="yardsDesc">Most yarn first</option><option value="yardsAsc">Least yarn first</option><option value="name">Name A–Z</option></select></label><label class="grow">Search<input id="search" type="search" placeholder="Name, designer, notes"></label></div>
-    <div class="actions"><button id="backup">Export backup</button><label class="upload">Restore backup<input id="restore" type="file" accept="application/json,.json"></label></div><p class="hint">Saved on this browser and device. Export a backup to move your patterns to another phone or protect them before clearing browser data.</p></div>
-  <div id="patterns"></div>
-  <details class="panel"><summary>Add a pattern from elsewhere</summary><form id="addPattern"><label>Pattern name<input id="patternName" maxlength="100" required></label><label>Yarn weight<select id="patternWeight"></select></label><label>Yards needed (optional)<input id="patternYards" inputmode="numeric" placeholder="450 or 400-1200"></label><label>Pattern link (optional)<input id="patternLink" type="url" placeholder="https://…"></label><label>Notes<textarea id="patternNotes" maxlength="10000" placeholder="Needles, yarn, gauge, where you stored the PDF…"></textarea></label><button class="primary">Save pattern</button></form></details>
+    <div class="actions"><button id="backup">Export backup</button><button type="button" id="recoveryBackup" hidden>Download recovery file</button><label class="upload">Restore backup<input id="restore" type="file" accept="application/json,.json"></label></div><p class="hint">Saved on this browser and device. Export a backup to move your patterns to another phone or protect them before clearing browser data.</p></div>
+  <p id="libraryResultCount" class="hint" role="status"></p><div id="patterns"></div>
+  <details class="panel"><summary>Add a pattern from elsewhere</summary><form id="addPattern"><label>Pattern name<input id="patternName" maxlength="100" required></label><label>Yarn weight<select id="patternWeight"></select></label><label>Yards needed (optional)<input id="patternYards" inputmode="text" placeholder="450 or 400-1200"></label><label>Pattern link (optional)<input id="patternLink" type="url" placeholder="https://…"></label><label>Notes<textarea id="patternNotes" maxlength="10000" placeholder="Needles, yarn, gauge, where you stored the PDF…"></textarea></label><button class="primary">Save pattern</button></form></details>
 </section>
 
 <section id="help" class="panel" hidden>
-  <figure class="kitten-banner"><img class="kitten" src="images/cat-yawn.jpg?v=3.1" alt="A Siamese cat yawning on a flower cat tree"><figcaption>Here to help (mostly)</figcaption></figure>
+  <figure class="kitten-banner"><img class="kitten" src="images/cat-yawn.jpg?v=3.2" alt="A Siamese cat yawning on a flower cat tree"><figcaption>Here to help (mostly)</figcaption></figure>
   <h2>A happy little start</h2>
   <ol><li>Set your stitch and row counts, pick a motif from the list and choose up to three colors.</li><li>Use Knit controls to change the layout, scale, spacing, mirroring and borders.</li><li>Upload artwork and tune the sliders, type your own grid, or connect AI for free-form ideas.</li><li>Tap squares to adjust. Save under a yarn weight, track your current row, download or print.</li></ol>
   <h3>Before you cast on</h3>
-  <p>Swatch first: stitch shape and gauge change the finished picture. Knit proportions is a preview, not a gauge calculation. This is a color chart, not a complete knitting pattern. The float check flags long color runs so you can catch floats.</p>
+  <p>Swatch first: stitch shape and gauge change the finished picture. Knit proportions is a preview, not a gauge calculation. This is a color chart, not a complete knitting pattern. The float check estimates per-color carried gaps, including the row join when knitting in the round. Colors absent from a whole row are not counted; yarn handling still needs a swatch and a human check.</p>
+  <h3>Projects & backups</h3><p>Use My projects for completed-row counters, repeat positions, needles, gauge, session notes and finishing dates. Start a project from a library card to link its pattern. Chart row markers and project counters are separate. Yarn links do not reserve inventory. Export backup is available on every section; it includes projects and the current chart draft. Restore shows a preview and lets you choose which matching records to keep. Invalid saved records are kept for recovery rather than silently discarded.</p>
   <h3>Phone & privacy</h3>
   <h3>Yarn & stash</h3><p>Each pattern suggests common yarns for its weight and an estimated cost. Add what you own in My stash to see which patterns it covers. Use Prices → Monthly price review to check and update your estimates each month. You can enter a price directly or export, edit and re-import a CSV.</p><p>Open your GitHub Pages address in your phone browser and use Add to Home Screen if available. Uploaded images and saved patterns stay in your browser. After one online visit, wait for “Ready for offline use” at the bottom before disconnecting. Monthly ideas, chart editing, saved patterns and stash work offline; Ravelry imports, external pattern links and AI need internet. The AI feature is off unless you add your own connector; only your typed prompt and chart size are sent to it.</p>
 </section>
-<footer><p>Made for slow mornings & beautiful stitches. 🧶</p><p id="offlineStatus" role="status">Local tools · optional online connectors</p></footer>
+<footer><p>Made for slow mornings & beautiful stitches.</p><p id="offlineStatus" role="status">Local tools · optional online connectors</p></footer>
 </main>
-<dialog id="saveDialog"><form id="saveForm"><h2>Save to your collection</h2><label>Yarn weight<select id="saveWeight"></select></label><label>Notes<textarea id="saveNotes" maxlength="10000" placeholder="Yarn, needle size, gauge…"></textarea></label><div class="actions"><button type="button" id="cancelSave">Cancel</button><button class="primary">Save pattern</button></div></form></dialog>
-<dialog id="stashEditDialog"><form id="stashEditForm"><h2 id="stashEditTitle">Edit yarn amounts</h2><p class="hint">Leave unknown amounts blank. If you only know total yards, enter that instead. When both skein fields are filled, their product is used. Changes stay in this app.</p><label>Yards per skein<input id="editStashYards" type="number" min="0.01" max="9999" step="any" inputmode="decimal"></label><label>Skeins<input id="editStashSkeins" type="number" min="0" max="999" step="any" inputmode="decimal"></label><label>Total yards (if skein details are unknown)<input id="editStashTotal" type="number" min="0" max="999999" step="any" inputmode="decimal"></label><div class="actions"><button type="button" id="cancelStashEdit">Cancel</button><button class="primary">Save amounts</button></div></form></dialog>
+<dialog id="saveDialog" aria-labelledby="saveDialogTitle"><form id="saveForm"><h2 id="saveDialogTitle">Save to your collection</h2><label>Yarn weight<select id="saveWeight"></select></label><label>Notes<textarea id="saveNotes" maxlength="10000" placeholder="Yarn, needle size, gauge…"></textarea></label><div class="actions"><button type="button" id="cancelSave">Cancel</button><button class="primary">Save pattern</button></div></form></dialog>
+<dialog id="stashEditDialog" aria-labelledby="stashEditTitle"><form id="stashEditForm"><h2 id="stashEditTitle">Edit yarn amounts</h2><label>Brand & yarn<input id="editStashBrand" maxlength="80" required></label><div class="pair"><label>Yarn weight<select id="editStashWeight"></select></label><label>Color<input id="editStashColor" maxlength="60"></label></div><label>Fiber composition<input id="editStashFiber" maxlength="200"></label><label>Dye lot<input id="editStashLot" maxlength="80"></label><div class="pair"><label>Paid per skein (USD)<input id="editStashPrice" type="number" inputmode="decimal" min="0" max="999.99" step="0.01"></label><label>Purchase date<input id="editStashPurchased" type="date"></label></div>
+<p class="hint">Leave unknown amounts blank. If you only know total yards, enter that instead. When both skein fields are filled, their product is used. Changes stay in this app.</p><label>Yards per skein<input id="editStashYards" type="number" min="0.01" max="9999" step="any" inputmode="decimal"></label><label>Skeins<input id="editStashSkeins" type="number" min="0" max="999" step="any" inputmode="decimal"></label><label>Total yards (if skein details are unknown)<input id="editStashTotal" type="number" min="0" max="999999" step="any" inputmode="decimal"></label><div class="actions"><button type="button" id="cancelStashEdit">Cancel</button><button class="primary">Save amounts</button></div></form></dialog>
+
+<dialog id="patternEditDialog" aria-labelledby="patternEditTitle"><form id="patternEditForm"><h2 id="patternEditTitle">Edit pattern details</h2><label>Name<input id="editPatternName" maxlength="100" required></label><label>Yarn weight<select id="editPatternWeight"></select></label><label>Yards needed<input id="editPatternYards" placeholder="450 or 400–1200"></label><label>Pattern link<input id="editPatternLink" type="url" maxlength="2000"></label><label>Notes<textarea id="editPatternNotes" maxlength="10000" rows="5"></textarea></label><p class="hint">Changes to these details are kept on future Ravelry imports.</p><div class="actions"><button type="button" id="cancelPatternEdit">Cancel</button><button class="primary">Save details</button></div></form></dialog>
+<dialog id="restoreDialog" aria-labelledby="restoreTitle"><form id="restoreForm"><h2 id="restoreTitle">Review your backup</h2><p id="restoreSummary"></p><label>Matching records<select id="restorePolicy"><option value="current">Keep this device’s versions</option><option value="backup">Use backup versions</option></select></label><p class="hint" id="restoreDraftNote"></p><label class="check"><input id="restoreDraft" type="checkbox"> Replace my current chart with the backup draft</label><label class="check"><input id="restorePrices" type="checkbox"> Use the backup’s price settings</label><p class="hint">New records are added; records absent from the backup are kept. Export this device’s backup first if you want a separate copy of its current versions. Connector settings and tokens are excluded.</p><div class="actions"><button type="button" id="cancelRestore">Cancel</button><button class="primary">Restore selected data</button></div></form></dialog>
+<dialog id="projectDialog" aria-labelledby="projectDialogTitle"><form id="projectForm"><h2 id="projectDialogTitle">Start a project</h2><label>Project name<input id="projectName" maxlength="100" required></label><label>Pattern reference<select id="projectPattern"></select></label><label>Yarn reference (does not reserve inventory)<select id="projectStash"></select></label><div class="pair"><label>Status<select id="projectStatus"><option value="active">On the needles</option><option value="paused">Paused</option><option value="complete">Finished</option></select></label><label>Started<input id="projectStarted" type="date" required></label></div><label>Current section<input id="projectSection" maxlength="100" placeholder="e.g. Left sleeve, before the next decrease"></label><div class="pair"><label>Needles / hook<input id="projectNeedles" maxlength="200" placeholder="4 mm circular, 80 cm"></label><label>Blocked gauge<input id="projectGauge" maxlength="200" placeholder="22 sts × 30 rows / 10 cm"></label></div><div class="pair"><label>Rows completed<input id="projectRow" type="number" min="0" max="1000000" step="1" inputmode="numeric" value="0"></label><label>Goal in rows (optional)<input id="projectGoal" type="number" min="0" max="1000000" step="1" inputmode="numeric"></label></div><div class="pair"><label>Repeat length in rows<input id="projectRepeat" type="number" min="0" max="1000000" step="1" inputmode="numeric" placeholder="e.g. 12"></label><label>Your size’s yardage<input id="projectYards" type="number" min="0" max="99999" step="any" inputmode="decimal" placeholder="Yards, before allowance"></label></div><details class="sub"><summary>Extra counters</summary><label>Counter 1 name<input id="projectCounter0" maxlength="40" placeholder="e.g. Decreases"></label><label>Counter 2 name<input id="projectCounter1" maxlength="40" placeholder="e.g. Cable crossings"></label><p class="hint">These counters advance independently. The repeat counter follows completed rows.</p></details><label>Notes for your next session<textarea id="projectNotes" maxlength="10000" rows="5" placeholder="Where to resume, size, adjustments, ends to weave in…"></textarea></label><div class="actions"><button type="button" id="cancelProject">Cancel</button><button class="primary">Save project</button></div></form></dialog>
+
 <p id="status" role="status" aria-live="polite"></p>
 </body>
 </html>
